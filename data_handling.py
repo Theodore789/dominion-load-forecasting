@@ -2,8 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt 
 from pathlib import Path
 
-# working on the folder "EIA_hourly_demand"
-
+# working on the folder containing the raw files
 folder = Path.home() / "Desktop" / "EIA_hourly_demand" # 17 files / tables
 files = sorted(folder.glob("*.csv"))
 
@@ -14,7 +13,6 @@ for f in files:
     parts.append(dom)
 
 load = pd.concat(parts, ignore_index=True) # combination succesful
-
 print(load.shape) # dimensions of our DataFrame
 
 load["UTC Time at End of Hour"] = pd.to_datetime( 
@@ -47,15 +45,13 @@ d = load["Demand (MW)"]
 
 gap_len = d.isna().groupby(d.notna().cumsum()).transform("sum")
 load["Demand (MW)"] = d.interpolate(method="time").where(d.notna() | (gap_len <= 2))
-
 print(load["Demand (MW)"].isna().sum())
 
 out = Path(__file__).parent / "data"
 out.mkdir(exist_ok=True)
 load[["Demand (MW)"]].to_csv(out / "dom_load_clean.csv") # created from the raw 17 files
 
-# working on weather.csv file
-
+# working on the file "weather.csv"
 w = pd.read_csv(out / "weather.csv", skiprows=5) # relevant data starts at row 6
 w["time"] = pd.to_datetime(w["time"])
 w = w.pivot(index="time", columns="location_id", values="temperature_2m (°C)") # long to wide table with pivot()
@@ -70,7 +66,6 @@ print(df.isna().sum())
 df.to_csv(out / "dom_merged.csv") # combined "dom_load_clean.csv" and "weather.csv"
 
 # temperature-demand scatter plot: Demand rises when its either very hot or cold; around 15°C demand is weather dependent-load
-
 plt.scatter(df["temp_mean"], df["Demand (MW)"], c=df.index.year, s=1)
 plt.colorbar(label="Year")
 plt.xlabel("Temperature (°C)")
@@ -78,7 +73,6 @@ plt.ylabel("Demand (MW)")
 plt.show()
 
 # line plot: Whether night hours are rising faster than the peak
-
 local = df.index.tz_localize("UTC").tz_convert("America/New_York")
 prof = df["Demand (MW)"].groupby([local.year, local.hour]).mean().unstack(0)
 prof = prof[list(range(2019, 2026))] # full years only (2019 - 2025)
@@ -89,10 +83,8 @@ plt.ylabel("Demand ÷ that year's mean")
 plt.show()
 
 # organising the numbers needed to feed the tree ensembles for my hypothesis
-
 d = df["Demand (MW)"]
 train_max = d[:"2022"].max()
 test = d["2024":]
 print(train_max, (test > train_max).sum(), (test > train_max).mean())
-
 print((test[test > train_max] - train_max).mean()) # 863.3804627249357 MW
