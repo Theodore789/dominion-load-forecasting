@@ -111,8 +111,11 @@
         
 
 21) The training data peaks at 22,415 MW.
+
         389 test hours or 1.6% of the test data are above that.
+
             These are exactly the record peaks that matter to most grid operators.
+
             Because there are only 389 of them the overall MAE may barely move in the experiment, while the errors on those hours could be large.
 
         On average, each hour of the 389 exceeds 22,415 MW by approximately 863 MW.
