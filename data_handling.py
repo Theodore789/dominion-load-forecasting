@@ -52,7 +52,7 @@ print(load["Demand (MW)"].isna().sum())
 
 out = Path(__file__).parent / "data"
 out.mkdir(exist_ok=True)
-load[["Demand (MW)"]].to_csv(out / "dom_load_clean.csv")
+load[["Demand (MW)"]].to_csv(out / "dom_load_clean.csv") # created from the raw 17 files
 
 # working on weather.csv file
 
@@ -67,9 +67,9 @@ df = load.join(w, how="left") # the joined DataFrame
 
 print(df.shape)
 print(df.isna().sum())
-df.to_csv(out / "dom_merged.csv")
+df.to_csv(out / "dom_merged.csv") # combined "dom_load_clean.csv" and "weather.csv"
 
-# Figure 1: Demand rises when its either very hot or cold; around 15°C demand is weather dependent-load
+# temperature-demand scatter plot: Demand rises when its either very hot or cold; around 15°C demand is weather dependent-load
 
 plt.scatter(df["temp_mean"], df["Demand (MW)"], c=df.index.year, s=1)
 plt.colorbar(label="Year")
@@ -77,7 +77,7 @@ plt.xlabel("Temperature (°C)")
 plt.ylabel("Demand (MW)")
 plt.show()
 
-# Figure 2: Whether night hours are rising faster than the peak
+# line plot: Whether night hours are rising faster than the peak
 
 local = df.index.tz_localize("UTC").tz_convert("America/New_York")
 prof = df["Demand (MW)"].groupby([local.year, local.hour]).mean().unstack(0)
@@ -94,12 +94,5 @@ d = df["Demand (MW)"]
 train_max = d[:"2022"].max()
 test = d["2024":]
 print(train_max, (test > train_max).sum(), (test > train_max).mean())
-# how many test hours are higher than anything the models will see in training
-# trees can't predict above that ceiling, that's why experiment B is on these hours
 
-print((test[test > train_max] - train_max).mean()) # 863.3804627249357
-# how far those 389 hours exceed the ceiling on average
-# a random forest can't predict above 22,415 MW 
-# so it will under-forecast those hours by at least that much 
-
-# on average each 1 hour out of the 389 exceeds 22,415 MW by approx 863.38 MW or 0,86338 GW
+print((test[test > train_max] - train_max).mean()) # 863.3804627249357 MW
