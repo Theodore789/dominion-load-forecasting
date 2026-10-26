@@ -13,7 +13,7 @@ for f in files:
     parts.append(dom)
 
 load = pd.concat(parts, ignore_index=True) # combination succesful
-print(load.shape) # dimensions of our DataFrame
+print(load.shape) # dimensions of the DataFrame
 
 load["UTC Time at End of Hour"] = pd.to_datetime( 
     load["UTC Time at End of Hour"], format="%m/%d/%Y %I:%M:%S %p")
@@ -38,9 +38,9 @@ print(gaps[gaps > 0].value_counts().sort_index()) # gap lengths of 1-hour, 2-hou
 
 gap_id = d.notna().cumsum()[d.isna()]
 summary = d[d.isna()].index.to_series().groupby(gap_id).agg(["min", "max", "count"])
-print(summary[summary["count"] > 23]) # the first and last hour and lenght of every gap of a day or longer
+print(summary[summary["count"] > 23]) # first and last hour and length of every gap of a day or longer
 
-load = load.loc["2018-10-01":"2026-09-30"] # skipping the long gap (July 2018 - September 2018) and stopping at the last full month (September 2026)
+load = load.loc["2018-10-01":"2026-09-30"] # skipping the long gap (Jul 2018 - Sept 2018) and stopping at the last full month (Sept 2026)
 d = load["Demand (MW)"]
 
 gap_len = d.isna().groupby(d.notna().cumsum()).transform("sum")
@@ -54,7 +54,7 @@ load[["Demand (MW)"]].to_csv(out / "dom_load_clean.csv") # created from the raw 
 # working on the file "weather.csv"
 w = pd.read_csv(out / "weather.csv", skiprows=5) # relevant data starts at row 6
 w["time"] = pd.to_datetime(w["time"])
-w = w.pivot(index="time", columns="location_id", values="temperature_2m (°C)") # long to wide table with pivot()
+w = w.pivot(index="time", columns="location_id", values="temperature_2m (°C)") # long to wide table with .pivot()
 w.columns = ["ashburn", "richmond", "norfolk"] # the 3 locations
 w["temp_mean"] = w.mean(axis=1) # average across each row, one temp for the entire DOM zone
 
@@ -65,7 +65,7 @@ print(df.shape)
 print(df.isna().sum())
 df.to_csv(out / "dom_merged.csv") # combined "dom_load_clean.csv" and "weather.csv"
 
-# temperature-demand scatter plot: Demand rises when its either very hot or cold; around 15°C demand is weather dependent-load
+# temperature-demand scatter plot: Demand rises when its either very hot or cold; around 15°C demand is weather-dependent load
 plt.scatter(df["temp_mean"], df["Demand (MW)"], c=df.index.year, s=1)
 plt.colorbar(label="Year")
 plt.xlabel("Temperature (°C)")

@@ -93,6 +93,7 @@
         (the same percentage) shows that the experiment should express load as a difference from recent levels, not ratio.
 
 20) Line plot:
+
         local time makes "hour 3" mean 3 am in Virginia.
 
         2018 and 2026 are partial years and 2018 is mostly winter so it would distort the shape. 
@@ -127,3 +128,10 @@
 22) Using random forests, we will try to predict the mean output of these 389 hours which is about:
         
         863.3804627249357 MW
+
+23) References for the modelling:
+         Hands-On Machine Learning with Scikit-Learn & TensorFlow, Aurélien Géron     pgs. 195-199
+
+        Machine Learning: A Probabilistic Perspective, Kevin P. Murphy 
+        pgs. 543-563
+

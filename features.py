@@ -1,0 +1,18 @@
+import pandas as pd
+from pathlib import Path
+HERE = Path(__file__).parent
+
+df = pd.read_csv(HERE/"data"/"dom_merged.csv", index_col=0, parse_dates=True)
+print(type(df.index)) # DatetimeIndex
+
+# together the asserts guarantee exactly one row per hour
+assert not df.index.duplicated().any(), "duplicate timestamps" # forbids duplicate timestamps, not duplicate values; two hours can have the same demand
+full_range = pd.date_range(df.index.min(), df.index.max(), freq="h")
+assert df.index.equals(full_range) # checks that no rows (timestamps) are missing
+
+df["lag_24"] = df["Demand (MW)"].shift(24) # demand of the previous day
+df["lag_48"] = df["Demand (MW)"].shift(48) # demand of two days prior
+df["lag_168"] = df["Demand (MW)"].shift(168) # demand of one week prior
+
+print(df.loc["2024-07-15 12:00"]) # sanity check
+print(df.loc["2024-07-14 12:00"])
