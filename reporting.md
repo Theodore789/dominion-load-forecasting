@@ -130,6 +130,7 @@
         863.3804627249357 MW
 
 23) References for the modelling:
+
          Hands-On Machine Learning with Scikit-Learn & TensorFlow, Aurélien Géron     pgs. 195-199
 
         Machine Learning: A Probabilistic Perspective, Kevin P. Murphy 
