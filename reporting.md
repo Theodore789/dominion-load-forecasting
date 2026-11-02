@@ -9,12 +9,14 @@
 
 2) We want the PJM grid operator's Dominion zone (code DOM) which covers most of Virginia and contains the data-centre cluster.
 
-    Balancing Authority --> PJM 
-    Sub-Region --> DOM
+        Balancing Authority --> PJM 
+        Sub-Region --> DOM
 
-3) Loop opens each file, keeps only the Dominion rows and puts them in a list, "pd.concat" then stacks the 17 pieces into 1 table.
+3) Loop opens each file, keeps only the Dominion rows and puts them in a list, 
+"pd.concat" then stacks the 17 pieces into 1 table.
 
-4) Turned the column "UTC Time at End of Hour" into real dates with "pd.to_datetime", made it the index and sorted by it. 
+4) Turned the column "UTC Time at End of Hour" into real dates with "pd.to_datetime", 
+made it the index and sorted by it. 
 
     With "format=" I tell pandas exactly how the dates are written.
 
@@ -35,7 +37,8 @@
 
         1st: 5 gaps of 1-2 hours.
 
-        2nd: 13 gaps of 23, 24, 25 hours --> the 23-hour and 25-hour ones are daylight-saving days because EIA reports in Virginia's local time.
+        2nd: 13 gaps of 23, 24, 25 hours --> 23-hour and 25-hour ones are daylight-saving days 
+        because EIA reports in Virginia's local time.
 
         3rd: 1 gap of 1,704 hours; 71 days in a row with no data.
 
@@ -43,8 +46,8 @@
 
 11) Demand is rising (temperature-demand scatter plot):
         
-        peak of 2019 --> 20,000 MW 
-        peak of 2026 --> 25,413 MW.
+            peak of 2019 --> 20,000 MW 
+            peak of 2026 --> 25,413 MW.
     
     In percentage terms the plot floor is rising even faster:
         lowest night-time hours from 7,500 MW to 12,000 MW;
@@ -52,7 +55,9 @@
 
     Every year has 2 peaks: winter heating and summer cooling.
 
-12) The 71-day gap is at the very start, from 9 July to 18 September 2018. We fix that by starting the data on October 1st 2018.
+12) The 71-day gap is at the very start, from 9 July to 18 September 2018. 
+
+    We fix that by starting the data on October 1st 2018.
     
     Most whole-day gaps fall on the November clock-change day:
         2018, 2019, 2023, 2024, 2025;
@@ -73,7 +78,9 @@
             37.5/-77.5 --> Richmond,
             36.75/-76.25 --> Norfolk
 
-15) Joined on the same timestamp, which is a simplification: demand is the avarage over the hour ending at t, while the temperature is an instant reading at t (a limitation).
+15) Joined on the same timestamp, which is a simplification: 
+    
+        Demand is the avarage over the hour ending at t, while the temperature is an instant reading at t (a limitation).
 
 ## Exploration
 
@@ -121,7 +128,8 @@
 
             These are exactly the record peaks that matter to most grid operators.
 
-            Because there are only 389 of them the overall MAE may barely move in the experiment, while the errors on those hours could be large.
+            Because there are only 389 of them the overall MAE may barely move in the experiment, 
+            while the errors on those hours could be large.
 
         On average, each hour of the 389 exceeds 22,415 MW by approximately 863 MW.
             
@@ -172,13 +180,16 @@
 
         Window is w rows and a gap is g rows, the number of windows that contain the whole gap is w-g+1.
 
-        For our example: 168-g+1, so g = 25, so the missing day in November is 25 hours long, not 24. Our missing days are Virginia local days and the day the clock goes back has 25 hours. The March clock-change day has 23; that's why the total is still 288 = 12 x 24.
+        For our example: 168-g+1, so g = 25, so the missing day in November is 25 hours long, not 24. 
+        Our missing days are Virginia local days and the day the clock goes back has 25 hours. 
+        The March clock-change day has 23; that's why the total is still 288 = 12 x 24.
 
         With min_periods = 144, a window can lose at most 24 hours. A 25-hour gap leaves 143, one short, so we get a NaN.
 
         Fix: change min_periods = 143.
 
-        For 2024 and 2025 we got 144 NaN hours each around 4-11 November; that's because of the US clock change where US clocks go back on the first Sunday of November.
+        For 2024 and 2025 we got 144 NaN hours each around 4-11 November; 
+        that's because of the US clock change where US clocks go back on the first Sunday of November.
 
 23) Our data is hour-ending so:
 
@@ -186,7 +197,8 @@
 
 24) On holidays:
 
-        On public holidays offices close, so demand looks like a weekend even on a weekday! If we don't flag the holiday days the model thinks Christmas Day is a normal Wednessday and over-forecasts.
+        On public holidays offices close, so demand looks like a weekend even on a weekday! 
+        If we don't flag the holiday days the model thinks Christmas Day is a normal Wednessday and over-forecasts.
 
         Pandas has a ready-made list of US federal holidays.
 
