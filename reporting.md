@@ -9,7 +9,8 @@
 
 2) We want the PJM grid operator's Dominion zone (code DOM) which covers most of Virginia and contains the data-centre cluster.
 
-    Balancing Authority --> PJM, Sub-Region --> DOM
+    Balancing Authority --> PJM 
+    Sub-Region --> DOM
 
 3) Loop opens each file, keeps only the Dominion rows and puts them in a list, "pd.concat" then stacks the 17 pieces into 1 table.
 
@@ -24,7 +25,7 @@
 
 7) 30,000 MW threshold is the first cleaning rule: "d[d > 30000] = None".
 
-8) gaps ≤ 2 h interpolated (method="time"); longer gaps left as NaN
+8) gaps ≤ 2 h interpolated (method="time"); longer gaps left as NaN.
 
 9) Caught 2 more missing hours: 19 October 2021 at 03:00 and 04:00 UTC
         
@@ -41,7 +42,9 @@
 10) Listed the first hour, last hour and length of every gap ≥ 1 (see 13).
 
 11) Demand is rising (temperature-demand scatter plot):
-        peak of 2019 --> 20,000 MW, peak of 2026 --> 25,413 MW.
+        
+        peak of 2019 --> 20,000 MW 
+        peak of 2026 --> 25,413 MW.
     
     In percentage terms the plot floor is rising even faster:
         lowest night-time hours from 7,500 MW to 12,000 MW;
