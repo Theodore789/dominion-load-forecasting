@@ -1,5 +1,6 @@
 import pandas as pd
 from pathlib import Path
+from pandas.tseries.holiday import USFederalHolidayCalendar
 HERE = Path(__file__).parent
 
 df = pd.read_csv(HERE/"data"/"dom_merged.csv", index_col=0, parse_dates=True)
@@ -30,3 +31,11 @@ df["month"] = local.month
 
 print(df.loc["2024-07-15 12:00", ["hour", "day_of_week", "month"]])
 print(df.loc["2024-01-15 12:00", ["hour", "day_of_week", "month"]])
+
+# holidays
+hols = USFederalHolidayCalendar().holidays(start="2018-01-01", end="2026-12-31")
+df["is_holiday"] = local.tz_localize(None).normalize().isin(hols).astype(int) # 1 if the local date of the row is in hols, else 0
+
+print(df.loc["2024-07-04 18:00", ["is_holiday"]]) # sanity check
+print(df.loc["2024-07-03 18:00", ["is_holiday"]])
+print(df["is_holiday"].sum()) # total number of holiday hours

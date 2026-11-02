@@ -182,3 +182,16 @@
 27) Our data is hour-ending so:
 
         hour = 8 means the hour 07:00-08:00 local time.
+
+28) On holidays:
+
+        On public holidays offices close, so demand looks like a weekend even on a weekday! If we don't flag the holiday days the model thinks Christmas Day is a normal Wednessday and over-forecasts.
+
+        Pandas has a ready-made list of US federal holidays.
+
+        Oct-Dec 2018 --> 4 holidays
+        2019 and 2020 --> 10 + 10 = 20 holidays
+        2021-2025 --> 5 * 11 = 55 holidays
+        Jan-Sept 2026 --> 7 holidays
+        Total holidays: 86
+        Total holiday hours: 86 * 24 = 2064
