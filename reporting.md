@@ -131,8 +131,47 @@
 
 23) References for the modelling:
 
-         Hands-On Machine Learning with Scikit-Learn & TensorFlow, Aurélien Géron     pgs. 195-199
+         Hands-On Machine Learning with Scikit-Learn & TensorFlow, Aurélien Géron pgs. 195-199   
 
-        Machine Learning: A Probabilistic Perspective, Kevin P. Murphy 
-        pgs. 543-563
+         Machine Learning: A Probabilistic Perspective, Kevin P. Murphy 
+         pgs. 543-563
 
+24) The fair fix for the data: min_periods=144
+
+        level_7d --> the average demand over a past week (168 hours).
+
+        min_periods = 144
+        this tells pandas to compute the average anyway as long as we have at least 144 hours there.
+
+        Our data are whole days so every day we keep has its night and its day so the average stays fair.
+
+        144 hours= 6 days so the average still works when one whole day is missing.
+
+        We're predicting the difference, not the demand because Trees can't extrapolate above the training numbers.
+
+        Instead of asking what will the demand be, ask how far above or below last week's average will it be.
+
+        So: forecast  = level_7d + predicted difference
+        The growth is carried by level_7d so the tree never has to extrapolate.
+
+25) Expected 167 NaN but got 887, 720 extra
+
+        min_periods = 168 (7 days) --> 2483 NaNs
+        min_periods = 144 (6 days) --> 887 NaNs
+        min_periods = 143 (about 6 days becuase of the 25 hour clock change days) --> 166 NaNs
+
+        24 rows lost to shift(24) then the window needs 144 real values. The first valid row is 24 + 144 - 1 = row 167, so 167 NaNs.
+
+        So, some windows lose more than 24 hours. Either a gap is longer than one day, or two missing days fall within the same week.
+
+26) nubmer of window containing the whole gap:
+
+        Window is w rows and a gap is g rows, the number of windows that contain the whole gap is w-g+1.
+
+        For our example: 168-g+1, so g = 25, so the missing day in November is 25 hours long, not 24. our missing days are Virginia local days and the day the clock goes back has 25 hours. The March clock change day has 23. That's why the total is still 288 = 12 x 24.
+
+        With min_periods = 144, a window can lose at most 24 hours. A 25-hour gap leaves 143, one short, so we get a NaN.
+
+        Fix: change min_periods = 143.
+
+        For 2024 and 2025 we got 144 NaN hours each around 4-11 November; that's because of the US clock change where US clocks go back on the first Sunday of November.
