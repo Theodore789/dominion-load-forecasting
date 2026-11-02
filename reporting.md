@@ -1,5 +1,5 @@
 ## Cleaning (data_handling.py)
-    # Sources: 
+     Sources: 
         https://www.eia.gov/electricity/gridmonitor/dashboard/electric_overview/US48/US48
 
          https://open-meteo.com/en/docs/historical-weather-api
@@ -71,17 +71,15 @@
 
 ## Exploration
 
-18) Temperature-demand scatter plot:
-        demand rises when it's cold (need heating)
-        and when it's hot (need cooling).
+16) Temperature-demand scatter plot:
 
-    The different color by year shows each year's U sitting higher thant the last.
+        Demand rises when it's cold (need heating) and when it's hot (need cooling).
 
-19) Temperature-demand scatter plot key points:
+        The different color by year shows each year's U sitting higher than the last.
 
-        The bottom of the U rises from about 7,500 MW to about 13,000 MW.
+        The bottom of the U rises from about 7,500 MW to about 12,000 MW.
 
-        At around 15°C nobody heats or cools much, so demand there is weather-dependent load.
+        At 15°C demand is the weather-independent (base) load.
 
         The base-line grew by roughly 5,000 MW.
 
@@ -91,18 +89,18 @@
         A shift that is added(the same MW at every temperature) rather than multiplied
         (the same percentage) shows that the experiment should express load as a difference from recent levels, not ratio.
 
-20) Line plot:
+17) Line plot:
 
-        local time makes "hour 3" mean 3 am in Virginia.
+        hour 3 = 02:00-03:00 (hour-ending, see 27).
 
         2018 and 2026 are partial years and 2018 is mostly winter so it would distort the shape. 
         
-        We take years 2019-2025 with len(range()).
+        full years only: 2019-2025.
 
         Dividing by each year's mean removes the growth so we compare only the shape 
         of each year.
 
-        If the night lines rise towards 1 over the year, the daily profile is flattening.
+        If the night lines rise towards 1 over the years, the daily profile is flattening.
 
         The 3-4 am trough rises every year, from 0.83 of the daily mean in 2019
         to 0.89 in 2025 while the evening peak falls from 1.13 to 1.10. 
@@ -111,7 +109,7 @@
         
 ## Experiment facts
 
-21) The training data peaks at 22,415 MW.
+18) The training data peaks at 22,415 MW.
 
         389 test hours or 1.6% of the test data are above that.
 
@@ -121,26 +119,22 @@
 
         On average, each hour of the 389 exceeds 22,415 MW by approximately 863 MW.
             
-            train max (2018-2022) --> 22,415 MW
-            test hours (2024-2026) higher than train max --> 389 hours
-            mean, average difference between test and train --> 0.0161
+            training max (2018-2022) --> 22,415 MW
+            test hours (2024-2026) higher than the training max --> 389 hours
+            the share of test hours above the training max --> 0.0161
         
-22) Using random forests, we will try to predict the mean output of these 389 hours which is about:
-        
-        863.3804627249357 MW
+19) References for the modelling:
 
-23) References for the modelling:
-
-         Hands-On Machine Learning with Scikit-Learn & TensorFlow, Aurélien Géron pgs. 195-199   
+         Hands-On Machine Learning with Scikit-Learn & TensorFlow, Aurélien Géron pp. 195-199   
 
          Machine Learning: A Probabilistic Perspective, Kevin P. Murphy 
-         pgs. 543-563
+         pp. 543-563
 
-         Information Theory, Inference, and Learning Algorithms, David J. C. MacKay pgs. 527-533
+         Information Theory, Inference, and Learning Algorithms, David J. C. MacKay pp. 527-533
 
 ## Features (features.py)
 
-24) The fair fix for the data: min_periods=144.
+24) The fair fix for the data: min_periods=143.
 
         level_7d --> the average demand over a past week (168 hours).
 
@@ -149,7 +143,9 @@
 
         Our data are whole days so every day we keep has its night and its day so the average stays fair.
 
-        144 hours = 6 days so the average still works when one whole day is missing.
+        143 hours = about 6 days so the average still works when one whole day is missing.
+
+20) Why the difference target
 
         We're predicting the difference, not the demand because Trees can't extrapolate above the training numbers.
 
@@ -158,17 +154,15 @@
         Hence: forecast  = level_7d + predicted difference.
         The growth is carried by level_7d so the tree never has to extrapolate.
 
-25) Expected 167 NaN but got 887, 720 extra.
+21) Expected 167 NaN but got 887, 720 extra.
 
         min_periods = 168 (7 days) --> 2483 NaNs
         min_periods = 144 (6 days) --> 887 NaNs
-        min_periods = 143 (about 6 days becuase of the 25 hour clock change days) --> 166 NaNs
+        min_periods = 143 (about 6 days because of the 25 hour clock change days) --> 166 NaNs
 
-        24 rows lost to shift(24) then the window needs 144 real values. The first valid row is 24 + 144 - 1 = row 167, so 167 NaNs.
+        24 + 144 - 1 = row 167, so 167 NaNs.
 
-        Henceforth, some windows lose more than 24 hours. Either a gap is longer than one day or two missing days fall within the same week.
-
-26) Number of windows containing the whole gap:
+22) Number of windows containing the whole gap:
 
         Window is w rows and a gap is g rows, the number of windows that contain the whole gap is w-g+1.
 
@@ -180,11 +174,11 @@
 
         For 2024 and 2025 we got 144 NaN hours each around 4-11 November; that's because of the US clock change where US clocks go back on the first Sunday of November.
 
-27) Our data is hour-ending so:
+23) Our data is hour-ending so:
 
         hour = 8 means the hour 07:00-08:00 local time.
 
-28) On holidays:
+24) On holidays:
 
         On public holidays offices close, so demand looks like a weekend even on a weekday! If we don't flag the holiday days the model thinks Christmas Day is a normal Wednessday and over-forecasts.
 
@@ -197,7 +191,12 @@
         Total holidays: 86
         Total holiday hours: 86 * 24 = 2064
 
-29) On temperature features:
+        4 Jul 2024 18:00 --> 1
+        3 Jul 2024 18:00 --> 0
+
+        Not all federal holidays cut load equally: e.g. Columbus day and Veterans day
+
+25) On temperature features:
 
         A linear model can only draw straight lines in each feature so with temp_mean (data_handling.py) it can't bend.
 
@@ -205,4 +204,18 @@
 
         Example: a + b * temp + c * temp ** 2
 
-        Although Trees don't need this, our Tao Hong linear benchmark does and it uses up to the cube.
+        Why the cube: the square gives a symmetric U and the cube lets the heating side and the cooling side differ. 
+
+        Although trees don't need this, our Tao Hong linear benchmark does and it uses up to the cube.
+
+26) features.py checks:
+
+        Both asserts pass so there's exactly one row per hour and shift(24) really goes 24 h back.
+
+        Lag check: 15 Jul 2024 12:00, lag_24 = 13,935
+
+        Calendar check: 12:00 UTC --> hour 8(July, EDT) and hour 7(January, EST).
+
+        Temperature check: 27.3 --> 745.29 --> 20,346.417
+
+        Final table shape: 70,128 x 15.
