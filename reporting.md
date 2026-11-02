@@ -1,5 +1,6 @@
 ## Cleaning (data_handling.py)
-     Sources: 
+     Sources:
+
         https://www.eia.gov/electricity/gridmonitor/dashboard/electric_overview/US48/US48
 
          https://open-meteo.com/en/docs/historical-weather-api
@@ -25,10 +26,12 @@
 
 8) gaps ≤ 2 h interpolated (method="time"); longer gaps left as NaN
 
-9) Caught 2 more missing hours: 19 October 2021 at 03:00 and 04:00 UTC.
-        total: 2,022 missing hours, ~1.5e9 MW
+9) Caught 2 more missing hours: 19 October 2021 at 03:00 and 04:00 UTC
+        
+    Total missibg hours: 2,022 h, ~1.5e9 MW.
 
-    Documented: 
+    Documented:
+
         1st: 5 gaps of 1-2 hours.
 
         2nd: 13 gaps of 23, 24, 25 hours --> the 23-hour and 25-hour ones are daylight-saving days because EIA reports in Virginia's local time.
@@ -109,7 +112,7 @@
         
 ## Experiment facts
 
-18) The training data peaks at 22,415 MW.
+18) The training data peaks at 22,415 MW
 
         389 test hours or 1.6% of the test data are above that.
 
@@ -134,7 +137,7 @@
 
 ## Features (features.py)
 
-24) The fair fix for the data: min_periods=143.
+24) The fair fix for the data: min_periods=143
 
         level_7d --> the average demand over a past week (168 hours).
 
@@ -145,7 +148,7 @@
 
         143 hours = about 6 days so the average still works when one whole day is missing.
 
-20) Why the difference target
+20) Why the difference target:
 
         We're predicting the difference, not the demand because Trees can't extrapolate above the training numbers.
 
