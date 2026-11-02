@@ -1,41 +1,39 @@
 import pandas as pd
 from pathlib import Path
 from pandas.tseries.holiday import USFederalHolidayCalendar
+
 HERE = Path(__file__).parent
 
-df = pd.read_csv(HERE/"data"/"dom_merged.csv", index_col=0, parse_dates=True)
-print(type(df.index)) # DatetimeIndex
+df = pd.read_csv(HERE / "data" / "dom_merged.csv", index_col=0, parse_dates=True)
 
 # together the asserts guarantee exactly one row per hour
-assert not df.index.duplicated().any(), "duplicate timestamps" # forbids duplicate timestamps, not duplicate values; two hours can have the same demand
+assert not df.index.duplicated().any(), "duplicate timestamps" # no duplicate timestamps
 full_range = pd.date_range(df.index.min(), df.index.max(), freq="h")
-assert df.index.equals(full_range) # checks that no rows (timestamps) are missing
+assert df.index.equals(full_range) # missing hourly rows
 
-df["lag_24"] = df["Demand (MW)"].shift(24) # demand of the previous day
-df["lag_48"] = df["Demand (MW)"].shift(48) # demand of two days prior
-df["lag_168"] = df["Demand (MW)"].shift(168) # demand of one week prior
+df["lag_24"] = df["Demand (MW)"].shift(24) # same hour yesterday
+df["lag_48"] = df["Demand (MW)"].shift(48) # same hour 2 days ago
+df["lag_168"] = df["Demand (MW)"].shift(168) # same hour last week
 
-print(df.loc["2024-07-15 12:00"]) # sanity check
-print(df.loc["2024-07-14 12:00"])
+# mean of the 168h ending 24h before; 143 so a 25h clock-change gap doesn't give Nan
+df["level_7d"] = df["Demand (MW)"].shift(24).rolling(168, min_periods=143).mean() 
 
-df["level_7d"] = df["Demand (MW)"].shift(24).rolling(168, min_periods=143).mean() # 143 hours --> about 6 days; still a fair mean
-print(df["level_7d"].isna().sum()) # missing hours (NaNs) with 143 minimum periods
-
-# calendar features
+# calendar features (EIA index is UTC, hour-ending -> Virginia local time)
 df.index = df.index.tz_localize("UTC")
 local = df.index.tz_convert("America/New_York")
 
-df["hour"] = local.hour
-df["day_of_week"] = local.day_of_week
+df["hour"] = local.hour # hour-ending: 8 = 07:00-08:00
+df["day_of_week"] = local.day_of_week # 0 = Monday
 df["month"] = local.month
-
-print(df.loc["2024-07-15 12:00", ["hour", "day_of_week", "month"]])
-print(df.loc["2024-01-15 12:00", ["hour", "day_of_week", "month"]])
 
 # holidays
 hols = USFederalHolidayCalendar().holidays(start="2018-01-01", end="2026-12-31")
 df["is_holiday"] = local.tz_localize(None).normalize().isin(hols).astype(int) # 1 if the local date of the row is in hols, else 0
 
-print(df.loc["2024-07-04 18:00", ["is_holiday"]]) # sanity check
-print(df.loc["2024-07-03 18:00", ["is_holiday"]])
-print(df["is_holiday"].sum()) # total number of holiday hours
+# temperature features (for the linear benchmark)
+df["temp_sq"] = df["temp_mean"] ** 2
+df["temp_cube"] = df["temp_mean"] ** 3
+
+df.to_csv(HERE / "data" / "features.csv")
+
+print(df.shape, df.columns.tolist())
