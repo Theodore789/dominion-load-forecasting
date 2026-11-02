@@ -3,7 +3,6 @@ from pathlib import Path
 from pandas.tseries.holiday import USFederalHolidayCalendar
 
 HERE = Path(__file__).parent
-
 df = pd.read_csv(HERE / "data" / "dom_merged.csv", index_col=0, parse_dates=True)
 
 # together the asserts guarantee exactly one row per hour
@@ -15,7 +14,7 @@ df["lag_24"] = df["Demand (MW)"].shift(24) # same hour yesterday
 df["lag_48"] = df["Demand (MW)"].shift(48) # same hour 2 days ago
 df["lag_168"] = df["Demand (MW)"].shift(168) # same hour last week
 
-# mean of the 168h ending 24h before; 143 so a 25h clock-change gap doesn't give Nan
+# mean of the 168 h ending 24 h before; 143 so a 25 h clock-change gap doesn't give NaN
 df["level_7d"] = df["Demand (MW)"].shift(24).rolling(168, min_periods=143).mean() 
 
 # calendar features (EIA index is UTC, hour-ending -> Virginia local time)
@@ -28,7 +27,7 @@ df["month"] = local.month
 
 # holidays
 hols = USFederalHolidayCalendar().holidays(start="2018-01-01", end="2026-12-31")
-df["is_holiday"] = local.tz_localize(None).normalize().isin(hols).astype(int) # 1 if the local date of the row is in hols, else 0
+df["is_holiday"] = local.tz_localize(None).normalize().isin(hols).astype(int) # 1 the local date is a federal holiday
 
 # temperature features (for the linear benchmark)
 df["temp_sq"] = df["temp_mean"] ** 2

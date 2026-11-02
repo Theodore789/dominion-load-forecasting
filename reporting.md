@@ -1,12 +1,20 @@
-1) Combined the 17 files into one table of hourly Domininion demand and saved it, indexed by UTC time.
+## Cleaning (data_handling.py)
+    # Sources: 
+        https://www.eia.gov/electricity/gridmonitor/dashboard/electric_overview/US48/US48
 
-2) We want the PJM grid operator's Dominion zone (code DOM) which covers most of Viriginia and contains the data-centre cluster.
+         https://open-meteo.com/en/docs/historical-weather-api
+
+1) Combined the 17 files into one table of hourly Dominion demand and saved it, indexed by UTC time.
+
+2) We want the PJM grid operator's Dominion zone (code DOM) which covers most of Virginia and contains the data-centre cluster.
+
     Balancing Authority --> PJM, Sub-Region --> DOM
 
 3) Loop opens each file, keeps only the Dominion rows and puts them in a list, "pd.concat" then stacks the 17 pieces into 1 table.
 
 4) Turned the column "UTC Time at End of Hour" into real dates with "pd.to_datetime", made it the index and sorted by it. 
-        With "format=" I tell pandas exactly how the dates are written.
+
+    With "format=" I tell pandas exactly how the dates are written.
 
 5) From 1 July 2018 05:00 UTC to 17 October 2026 there are 72,720 rows. 
     With "count()" we counted 70,700 so 2,020 rows have a timestamp but an empty demand value.
@@ -15,62 +23,53 @@
 
 7) 30,000 MW threshold is the first cleaning rule: "d[d > 30000] = None".
 
-8) "gaps =" counts the missing hours: scattered hours(easy to fill) or long blocks(safer to drop).
+8) gaps ≤ 2 h interpolated (method="time"); longer gaps left as NaN
 
-9) missing hours --> fill,
-   long blocks --> drop
-
-10) Caught 2 more missing hours: 19 October 2021 at 03:00 and 04:00 UTC
-    ,total: 2,022 missing hours.
+9) Caught 2 more missing hours: 19 October 2021 at 03:00 and 04:00 UTC.
+        total: 2,022 missing hours, ~1.5e9 MW
 
     Documented: 
-        1st: 5 gaps of 1-2 hours, 
-        2nd: 13 gaps of 23, 24, 25 hours --> the 23-hour and 25-hour ones are daylight-saving days because EIA reports in Virginia's local time;
-        3d: 1 gap of 1,704 hours; 71 days in a row with no data.
+        1st: 5 gaps of 1-2 hours.
 
-11) Next, we find where the long gaps are:
-    "gap_id =",
-    "summary =",
-    "print()":
-     the first and last hour and length of every gap of a day or longer.
+        2nd: 13 gaps of 23, 24, 25 hours --> the 23-hour and 25-hour ones are daylight-saving days because EIA reports in Virginia's local time.
 
-12) Demand is rising (temperature-demand scatter plot):
-        peak of 20219 --> 20,000 MW, peak of 2026 --> 25,413 MW.
+        3rd: 1 gap of 1,704 hours; 71 days in a row with no data.
+
+10) Listed the first hour, last hour and length of every gap ≥ 1 (see 13).
+
+11) Demand is rising (temperature-demand scatter plot):
+        peak of 2019 --> 20,000 MW, peak of 2026 --> 25,413 MW.
     
-    The plot floor is rising even faster:
-        lowest nigh-time hours from 7,500 MW to 12,000 MW;
-        this is demand that never switches off by data-centres working 24/7.
+    In percentage terms the plot floor is rising even faster:
+        lowest night-time hours from 7,500 MW to 12,000 MW;
+        this is consistent with always-on data-centre load.
 
     Every year has 2 peaks: winter heating and summer cooling.
 
-13) The 71-day gap is at the very start, from 9 July to 18 September 2018.
-    We fix that by starting the data on October 1st 2018.
+12) The 71-day gap is at the very start, from 9 July to 18 September 2018. We fix that by starting the data on October 1st 2018.
     
     Most whole-day gaps fall on the November clock-change day:
         2018, 2019, 2023, 2024, 2025;
-        it's a recurring EIA reporting fault.
+        it appears to be a reccuring reporting gap.
     
-    The October 2026 gap will be cut off when we stop the data at 30 September.
+    The October 2026 gap was cut off when we stopped the data at 30 September.
 
-14) With "load = load.loc["2018-10-01":"2026-09-30"]" we skip the long gap of       July-September 2018 and then stop at the last full month which is September 2026.
+    Start 1 Oct 2018, end 30 Sept 2026.
 
-15) We have 288 hours missing in total which is 12 whole days: 
-    7 November clock-change days, 4 in March and in August 2nd of 2020.
+13) 7 November clock-change days, plus 2 Aug 2020:
 
-16) Working on the weather data:
-    Open-Meteo moved each point to the nearest ERA5 grid cell which is about 25km across:
-        39.0/-77.5 --> Ashburn(data-centre hub),
-        37.5/-77.5 --> Richmond,
-        36.75/-76.25 --> Norfolk
+        70,128 hours, 288 missing demand and 0 missing temperatures
 
-17) ".pivot": 
-    before --> 1 row per location per hour, after --> 1 row per hour and one column per location.
+14) ERA5 via the Open-Meteo Historical API, hourly temperature_2m, GMT:
+    
+        Open-Meteo moved each point to the nearest ERA5 grid cell which is about 25km across:
+            39.0/-77.5 --> Ashburn(data-centre hub),
+            37.5/-77.5 --> Richmond,
+            36.75/-76.25 --> Norfolk
 
-    ".join" matches demand and temperature by timestamp and "how='left'" keeps every demand hour.
+15) Joined on the same timestamp, which is a simplification: demand is the avarage over the hour ending at t, while the temperature is an instant reading at t (a limitation).
 
-    We joined the demand and time for simplification because 
-        demand is labelled by the end of each hour (see dom_load_clean.csv)
-        and temperature is a reading at that moment (see weather.csv).
+## Exploration
 
 18) Temperature-demand scatter plot:
         demand rises when it's cold (need heating)
@@ -110,6 +109,7 @@
         
         The order is steady from year to year.
         
+## Experiment facts
 
 21) The training data peaks at 22,415 MW.
 
@@ -138,6 +138,7 @@
 
          Information Theory, Inference, and Learning Algorithms, David J. C. MacKay pgs. 527-533
 
+## Features (features.py)
 
 24) The fair fix for the data: min_periods=144.
 
@@ -195,3 +196,13 @@
         Jan-Sept 2026 --> 7 holidays
         Total holidays: 86
         Total holiday hours: 86 * 24 = 2064
+
+29) On temperature features:
+
+        A linear model can only draw straight lines in each feature so with temp_mean (data_handling.py) it can't bend.
+
+        We create a column with the squared and then cubed temperature for our model to be able to draw a U-shaped curve
+
+        Example: a + b * temp + c * temp ** 2
+
+        Although Trees don't need this, our Tao Hong linear benchmark does and it uses up to the cube.
