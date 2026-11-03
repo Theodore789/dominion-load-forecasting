@@ -29,7 +29,7 @@ made it the index and sorted by it.
     
     With "count()" we counted 70,700 so 2,020 rows have a timestamp but an empty demand value.
 
-6) EIA says DOM's highest winter peak on record in 2025-26 was 25,413 MW.
+6) Highest hourly value in our cleaned EIA-930 data: 25,413 MW (winter 2025-26).
 
 7) 30,000 MW threshold is the first cleaning rule: "d[d > 30000] = None".
 
