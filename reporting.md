@@ -1,8 +1,10 @@
 ## Cleaning (data_handling.py)
      Sources:
 
-        U.S. Energy Information Administration (2026) Hourly Electric Grid Monitor (Form EIA-930): balancing authority sub-region data, six-month files. Available at: https://www.eia.gov/electricity/gridmonitor/ 
-        Accessed on: 18 October 2026
+        U.S. Energy Information Administration (2026) Hourly Electric Grid Monitor (Form EIA-930): balancing authority sub-region data, six-month files. 
+        
+            Available at: https://www.eia.gov/electricity/gridmonitor/ 
+            Accessed on: 18 October 2026
 
         Zippenfenig, P. (2023) Open-Meteo.com Weather API [Computer software]. Zenodo. doi:10.5281/zenodo.7970649.
         
