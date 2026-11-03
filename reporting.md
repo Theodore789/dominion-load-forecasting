@@ -239,8 +239,8 @@ made it the index and sorted by it.
 
 ## References
 
-Géron, A. (2017) Hands-On Machine Learning with Scikit-Learn… (First Edition). Sebastopol, CA: O’Reilly, pp. 195–199.   
+Géron, A. (2017) Hands-On Machine Learning with Scikit-Learn and TensorFlow (First Edition). Sebastopol, CA: O’Reilly, pp. 195–199.   
 
 Murphy, K.P. (2012) Machine learning: a probabilistic perspective. Cambridge, MA: MIT Press, pp. 543–563: trees and boosting.
 
-MacKay, D.J.C. (2003) Information theory, inference, and learning algorithms. Cambridge: Cambridge University Press, pp. 527–533.
+MacKay, D.J.C. (2003) Information theory, inference, and learning algorithms. Cambridge: Cambridge University Press, pp. 527–533: MLPs.
