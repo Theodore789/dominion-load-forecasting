@@ -1,9 +1,12 @@
 ## Cleaning (data_handling.py)
      Sources:
 
-        https://www.eia.gov/electricity/gridmonitor/dashboard/electric_overview/US48/US48
+        U.S. Energy Information Administration (2026) Hourly Electric Grid Monitor (Form EIA-930): balancing authority sub-region data, six-month files. Available at: https://www.eia.gov/electricity/gridmonitor/ 
+        Accessed on: 18 October 2026
 
-         https://open-meteo.com/en/docs/historical-weather-api
+        Zippenfenig, P. (2023) Open-Meteo.com Weather API [Computer software]. Zenodo. doi:10.5281/zenodo.7970649.
+        
+        Hersbach, H. et al. (2020) ‘The ERA5 global reanalysis’, Quarterly Journal of the Royal Meteorological Society, 146(730), pp. 1999–2049. doi:10.1002/qj.3803.
 
 1) Combined the 17 files into one table of hourly Dominion demand and saved it, indexed by UTC time.
 
@@ -21,28 +24,30 @@ made it the index and sorted by it.
     With "format=" I tell pandas exactly how the dates are written.
 
 5) From 1 July 2018 05:00 UTC to 17 October 2026 there are 72,720 rows. 
+    
     With "count()" we counted 70,700 so 2,020 rows have a timestamp but an empty demand value.
 
-6) EIA says DOM's highest winter peak on record in 2025-26 was 25,413MW.
+6) EIA says DOM's highest winter peak on record in 2025-26 was 25,413 MW.
 
 7) 30,000 MW threshold is the first cleaning rule: "d[d > 30000] = None".
 
 8) gaps ≤ 2 h interpolated (method="time"); longer gaps left as NaN.
 
-9) Caught 2 more missing hours: 19 October 2021 at 03:00 and 04:00 UTC
+9) Caught 2 more missing hours: 19 October 2021 at 03:00 and 04:00 UTC (~1.5e9 MW, set to missing).
         
-    Total missibg hours: 2,022 h, ~1.5e9 MW.
+    Total missibg hours: 2,022 h
 
     Documented:
 
         1st: 5 gaps of 1-2 hours.
 
-        2nd: 13 gaps of 23, 24, 25 hours --> 23-hour and 25-hour ones are daylight-saving days 
+        2nd: 13 gaps of 23, 24, 25 hours --> 23-hour and 25-hour ones are
+            daylight-saving days.
         because EIA reports in Virginia's local time.
 
         3rd: 1 gap of 1,704 hours; 71 days in a row with no data.
 
-10) Listed the first hour, last hour and length of every gap ≥ 1 (see 13).
+10) Listed the first hour, last hour and length of every gap ≥ 1 day (see 12).
 
 11) Demand is rising (temperature-demand scatter plot):
         
@@ -50,6 +55,7 @@ made it the index and sorted by it.
             peak of 2026 --> 25,413 MW.
     
     In percentage terms the plot floor is rising even faster:
+
         lowest night-time hours from 7,500 MW to 12,000 MW;
         this is consistent with always-on data-centre load.
 
@@ -60,27 +66,25 @@ made it the index and sorted by it.
     We fix that by starting the data on October 1st 2018.
     
     Most whole-day gaps fall on the November clock-change day:
-        2018, 2019, 2023, 2024, 2025;
-        it appears to be a reccuring reporting gap.
+        2018, 2019, 2022, 2023, 2024, 2025;
+        it appears to be a recurring reporting gap.
     
     The October 2026 gap was cut off when we stopped the data at 30 September.
 
-    Start 1 Oct 2018, end 30 Sept 2026.
+    Start 1 October 2018, end 30 September 2026.
 
-13) 7 November clock-change days, plus 2 Aug 2020:
-
-        70,128 hours, 288 missing demand and 0 missing temperatures
+13) 7 November clock-change days, 4 March clock-changes, plus 2 Aug 2020 = 12 days = 288 h
 
 14) ERA5 via the Open-Meteo Historical API, hourly temperature_2m, GMT:
     
         Open-Meteo moved each point to the nearest ERA5 grid cell which is about 25km across:
-            39.0/-77.5 --> Ashburn(data-centre hub),
+            39.0/-77.5 --> Ashburn (data-centre hub),
             37.5/-77.5 --> Richmond,
             36.75/-76.25 --> Norfolk
 
 15) Joined on the same timestamp, which is a simplification: 
     
-        Demand is the avarage over the hour ending at t, while the temperature is an instant reading at t (a limitation).
+        Demand is the average over the hour ending at t, while the temperature is an instant reading at t (a limitation).
 
 ## Exploration
 
@@ -88,7 +92,7 @@ made it the index and sorted by it.
 
         Demand rises when it's cold (need heating) and when it's hot (need cooling).
 
-        The different color by year shows each year's U sitting higher than the last.
+        The different colour by year shows each year's U sitting higher than the last.
 
         The bottom of the U rises from about 7,500 MW to about 12,000 MW.
 
@@ -99,12 +103,11 @@ made it the index and sorted by it.
         The whole U moves up by about the same amount everywhere.
         Peaks rose by roughly 5,000 MW too.
 
-        A shift that is added(the same MW at every temperature) rather than multiplied
-        (the same percentage) shows that the experiment should express load as a difference from recent levels, not ratio.
+        A shift that is added (the same MW at every temperature) rather than multiplied (the same percentage) shows that the experiment should express load as a difference from recent levels, not ratio.
 
 17) Line plot:
 
-        hour 3 = 02:00-03:00 (hour-ending, see 27).
+        hour 3 = 02:00-03:00 (hour-ending, see 22).
 
         2018 and 2026 are partial years and 2018 is mostly winter so it would distort the shape. 
         
@@ -137,23 +140,14 @@ made it the index and sorted by it.
             test hours (2024-2026) higher than the training max --> 389 hours
             the share of test hours above the training max --> 0.0161
         
-19) References for the modelling:
-
-         Hands-On Machine Learning with Scikit-Learn & TensorFlow, Aurélien Géron pp. 195-199   
-
-         Machine Learning: A Probabilistic Perspective, Kevin P. Murphy 
-         pp. 543-563
-
-         Information Theory, Inference, and Learning Algorithms, David J. C. MacKay pp. 527-533
-
 ## Features (features.py)
 
-24) The fair fix for the data: min_periods=143
+19) The fair fix for the data: min_periods=143
 
         level_7d --> the average demand over a past week (168 hours).
 
-        min_periods = 144
-        this tells pandas to compute the average anyway as long as we have at least 144 hours there.
+        min_periods = 143
+        this tells pandas to compute the average anyway as long as we have at least 143 hours there.
 
         Our data are whole days so every day we keep has its night and its day so the average stays fair.
 
@@ -168,19 +162,24 @@ made it the index and sorted by it.
         Hence: forecast  = level_7d + predicted difference.
         The growth is carried by level_7d so the tree never has to extrapolate.
 
-21) Expected 167 NaN but got 887, 720 extra.
+21) NaN counts in level_7d:
 
         min_periods = 168 (7 days) --> 2483 NaNs
         min_periods = 144 (6 days) --> 887 NaNs
         min_periods = 143 (about 6 days because of the 25 hour clock change days) --> 166 NaNs
 
         24 + 144 - 1 = row 167, so 167 NaNs.
+        with 143: 24 + 143 - 1 = 166, all before 15 October 2018
 
 22) Number of windows containing the whole gap:
 
+        For 2024 and 2025 we got 144 NaN hours each around 4-11 November; 
+        that's because of the US clock change where US clocks go back on the first Sunday of November.
+
+        For our example: 168 - g + 1 = 144 --> g = 25, so the missing day in November is 25 hours long, not 24. 
+
         Window is w rows and a gap is g rows, the number of windows that contain the whole gap is w-g+1.
 
-        For our example: 168-g+1, so g = 25, so the missing day in November is 25 hours long, not 24. 
         Our missing days are Virginia local days and the day the clock goes back has 25 hours. 
         The March clock-change day has 23; that's why the total is still 288 = 12 x 24.
 
@@ -188,8 +187,6 @@ made it the index and sorted by it.
 
         Fix: change min_periods = 143.
 
-        For 2024 and 2025 we got 144 NaN hours each around 4-11 November; 
-        that's because of the US clock change where US clocks go back on the first Sunday of November.
 
 23) Our data is hour-ending so:
 
@@ -212,7 +209,7 @@ made it the index and sorted by it.
         4 Jul 2024 18:00 --> 1
         3 Jul 2024 18:00 --> 0
 
-        Not all federal holidays cut load equally: e.g. Columbus day and Veterans day
+        Not all federal holidays cut load equally: e.g. Columbus Day and Veterans day.
 
 25) On temperature features:
 
@@ -237,3 +234,11 @@ made it the index and sorted by it.
         Temperature check: 27.3 --> 745.29 --> 20,346.417
 
         Final table shape: 70,128 x 15.
+
+## References
+
+Géron, A. (2017) Hands-On Machine Learning with Scikit-Learn… (First Edition). Sebastopol, CA: O’Reilly, pp. 195–199.   
+
+Murphy, K.P. (2012) Machine learning: a probabilistic perspective. Cambridge, MA: MIT Press, pp. 543–563: trees and boosting.
+
+MacKay, D.J.C. (2003) Information theory, inference, and learning algorithms. Cambridge: Cambridge University Press, pp. 527–533.
