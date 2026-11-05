@@ -75,7 +75,7 @@ made it the index and sorted by it.
 
     Start 1 October 2018, end 30 September 2026.
 
-13) 7 November clock-change days, 4 March clock-changes, plus 2 Aug 2020 = 12 days = 288 h
+13) 7 November clock-change days (25 h each), 4 March clock-changes (23 h each), plus on the 2nd of August 2020 (24 hours) = 12 days = 288 h
 
 14) ERA5 via the Open-Meteo Historical API, hourly temperature_2m, GMT:
     
@@ -236,6 +236,10 @@ made it the index and sorted by it.
         Temperature check: 27.3 --> 745.29 --> 20,346.417
 
         Final table shape: 70,128 x 15.
+
+27) Day D = Virginia local day. We are going to be using the local day because all our calendar features, holidays and missing days are in local time already. A grid operator also plans in local days.
+
+28) 
 
 ## References
 
