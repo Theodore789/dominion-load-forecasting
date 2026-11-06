@@ -23,11 +23,9 @@ print((train & ~has_y).sum(), (val & ~has_y).sum(), (test & ~has_y).sum())
 pred = df["lag_168"]
 y = df["Demand (MW)"]
 m = val & has_y & pred.notna()
+
 err = pred[m] - y[m]
 mae = err.abs().mean()
 me = err.mean()
-print(m.sum(), mae, me) # predictions: 8000, 1000, -50
 
-# m.sum() --> the total hours where the val split has values along with the not-nan values of the prediction
-# mea --> the true error distance, hence the abs()
-# me --> the mean error; how much the prediction was off from the actual MW value 
+print(m.sum(), mae, me) 

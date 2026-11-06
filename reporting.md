@@ -237,9 +237,12 @@ made it the index and sorted by it.
 
         Final table shape: 70,128 x 15.
 
+## Modelling (modelling.py)  
+
 27) Day D = Virginia local day. We are going to be using the local day because all our calendar features, holidays and missing days are in local time already. A grid operator also plans in local days.
 
-28) 
+28) lag_168, which is "the same hour last week", can't react when the weather changes;
+sudden cold weather after a mild week last week gives errors of thousands of MWs, and a holiday a week prior spoils the next week's forecast too.
 
 ## References
 
