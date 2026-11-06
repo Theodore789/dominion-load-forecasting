@@ -16,7 +16,9 @@ load = pd.concat(parts, ignore_index=True) # combination succesful
 print(load.shape) # dimensions of the DataFrame
 
 load["UTC Time at End of Hour"] = pd.to_datetime( 
-    load["UTC Time at End of Hour"], format="%m/%d/%Y %I:%M:%S %p")
+    load["UTC Time at End of Hour"], format="%m/%d/%Y %I:%M:%S %p"
+    )
+
 load = load.set_index("UTC Time at End of Hour")
 load = load.sort_index()
 
@@ -54,9 +56,14 @@ load[["Demand (MW)"]].to_csv(out / "dom_load_clean.csv") # created from the raw 
 # working on the file "weather.csv"
 w = pd.read_csv(out / "weather.csv", skiprows=5) # relevant data starts at row 6
 w["time"] = pd.to_datetime(w["time"])
-w = w.pivot(index="time", columns="location_id", values="temperature_2m (°C)") # long to wide table with .pivot()
-w.columns = ["ashburn", "richmond", "norfolk"] # the 3 locations
-w["temp_mean"] = w.mean(axis=1) # average across each row, one temp for the entire DOM zone
+
+w = w.pivot(index="time", 
+            columns="location_id", 
+            values="temperature_2m (°C)"
+            )
+
+w.columns = ["ashburn", "richmond", "norfolk"] # Virginia locations of interest
+w["temp_mean"] = w.mean(axis=1) # average across each row, one temp for the entire DOM
 
 load = pd.read_csv(out / "dom_load_clean.csv", index_col=0, parse_dates=True)
 df = load.join(w, how="left") # the joined DataFrame
