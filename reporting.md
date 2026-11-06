@@ -245,6 +245,15 @@ made it the index and sorted by it.
 28) lag_168, which is "the same hour last week", can't react when the weather changes;
 sudden cold weather after a mild week last week gives errors of thousands of MWs, and a holiday a week prior spoils the next week's forecast too.
 
+29) Seasonal naive on validation 2023, 8,664 h, scored:
+
+        MAE --> 1236.6806
+        Mean error --> 40.6695
+
+30) 
+
+31) 
+
 ## References
 
 Géron, A. (2017) Hands-On Machine Learning with Scikit-Learn and TensorFlow (First Edition). Sebastopol, CA: O’Reilly, pp. 195–199.   
