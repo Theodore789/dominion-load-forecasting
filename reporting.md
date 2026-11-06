@@ -218,7 +218,7 @@ made it the index and sorted by it.
 
         A linear model can only draw straight lines in each feature so with temp_mean (data_handling.py) it can't bend.
 
-        We create a column with the squared and then cubed temperature for our model to be able to draw a U-shaped curve
+        We create a column with the squared and then cubed temperature for our model to be able to draw a U-shaped curve.
 
         Example: a + b * temp + c * temp ** 2
 
@@ -245,14 +245,58 @@ made it the index and sorted by it.
 28) lag_168, which is "the same hour last week", can't react when the weather changes;
 sudden cold weather after a mild week last week gives errors of thousands of MWs, and a holiday a week prior spoils the next week's forecast too.
 
-29) Seasonal naive on validation 2023, 8,664 h, scored:
+## Baselines for the models
 
-        MAE --> 1236.6806
-        Mean error --> 40.6695
+29) Seasonal naive on validation 2023 (8,664 h), scored:
 
-30) 
+        MAE --> 1236,68 MW (1236,6806325023083) 
+        RMSE --> 1719,54 MW (1719,5468206170167)
+        MAPE --> 9,17 % (9,174650636871938)
+        ME --> -40,66 MW (-40,66955216989843) 
+        MAE_top5 --> 1901,66 MW (1901,799539170507)
 
-31) 
+        Under-forecast (our result from the ME):
+
+        Error = actual - forecast ("y - pred", modelling.py).
+        On ME: we get a negative value which means that the baseline is ~ -40,66 MW which indicates a slight over-forecast of about 40,66 MW.
+
+        Over-forecast:
+
+        If we had chosen to display the error as Error = forecast - actual, our ME value would then be positive: 40,66 MW, an indication of a small under-forecast.
+        
+30) Tao Hong vanilla linear model predictions:
+
+        MAE --> 396,27 MW (396,2750552956701)
+        RMSE --> 521,26 MW (521,2625615739648)
+        MAPE --> 2,96 % (2,966182517833976)
+        ME --> 140,91 MW (140,91284201377937)
+        MAE_top5 --> 610,66 MW (610,6601099444198)
+
+## Tree model parameters and results for each run
+
+31) Gradient boosted trees paramaters for the 1st run and results:
+
+Run 1:
+
+        Parameters:
+
+        max_iter=500,                              100, 100, 300, 400, 400
+        learning_rate=0.05,                      0.05, 0.06, 0.06, 0.05, 0.06
+        early_stopping=False, 
+        random_state=0
+        
+        Results: 
+
+        MAE --> 708,96 MW (708,9642475194357)       708.6278 (~0.3150), 705.8645 (~2.7620)
+        RMSE --> 848,36 MW (848,3616695308813)      852.2297 (~worse), 844.7154 (~7.6000)
+        MAPE --> 5,32 % (5,3251328239625195)        5.2486   (~0.750), 5.2524 (~worse)
+        ME --> 669,22 MW (669.2241345710112)        665.0321 (~4.2), 665.5980 (~worse)
+        MAE_top5 --> 841,90 MW (841.9028475047786)  1020.1089 (~worse), 952.4689 (~69.0000)
+
+Run 2: 
+
+
+
 
 ## References
 
@@ -261,3 +305,7 @@ Géron, A. (2017) Hands-On Machine Learning with Scikit-Learn and TensorFlow (Fi
 Murphy, K.P. (2012) Machine learning: a probabilistic perspective. Cambridge, MA: MIT Press, pp. 543–563: trees and boosting.
 
 MacKay, D.J.C. (2003) Information theory, inference, and learning algorithms. Cambridge: Cambridge University Press, pp. 527–533: MLPs.
+
+Hong, T. et al. (2020) ‘Energy Forecasting: A Review and Outlook’, IEEE Open Access Journal of Power and Energy, 7, pp. 376–388. Available at: https://doi.org/10.1109/OAJPE.2020.3029979.
+
+
