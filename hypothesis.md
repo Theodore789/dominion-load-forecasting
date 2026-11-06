@@ -50,3 +50,8 @@
 
             Not supported if: 
                 The interval includes 0 or the difference model is worse.
+
+        ## 6 November 2026:
+                Final models are trained on Oct 2018 - Dec 2022 only, while 2023 is used only for choosing settings. 
+                
+                As a secondary analysis, the linear and best tree models are also refitted on Oct 2018 - Dec 2023 and evaluated on the same test hours; this does not change the pre-registered test of our experiment.
