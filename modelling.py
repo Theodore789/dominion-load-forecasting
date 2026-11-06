@@ -1,6 +1,27 @@
 import pandas as pd
 from pathlib import Path
 
+
+def score(pred, y):
+
+    err = pred - y
+    
+    mae = (err).abs().mean()
+    rmse = ((err).mean()) ** 0.5
+    mape = ((((err) / y).abs().mean())) * 100
+    me = (err).mean()
+
+    top = y >= y.quantile(0.95)
+    mae_top5 = (err[top]).abs().mean()
+    
+    return {"MAE": mae, 
+            "RMSE": rmse, 
+            "MAP": mape, 
+            "ME": me, 
+            "MAE_TOP5":mae_top5
+            }
+
+
 HERE = Path(__file__).parent
 df = pd.read_csv(HERE / "data" / "features.csv", index_col=0, parse_dates=True)
 
@@ -24,8 +45,6 @@ pred = df["lag_168"]
 y = df["Demand (MW)"]
 m = val & has_y & pred.notna()
 
-err = pred[m] - y[m]
-mae = err.abs().mean()
-me = err.mean()
+print(score(pred[m], y[m]))
 
-print(m.sum(), mae, me) 
+print(y["2022-12-31"].mean(), y["2023-12-31"].mean()) # sanity check
