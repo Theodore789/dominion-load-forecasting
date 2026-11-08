@@ -249,32 +249,32 @@ sudden cold weather after a mild week last week gives errors of thousands of MWs
 
 29) Seasonal naive on validation 2023 (8,664 h), scored:
 
-        MAE --> 1236,68 MW (1236,6806325023083) 
-        RMSE --> 1719,54 MW (1719,5468206170167)
-        MAPE --> 9,17 % (9,174650636871938)
-        ME --> -40,66 MW (-40,66955216989843) 
-        MAE_top5 --> 1901,66 MW (1901,799539170507)
+        MAE --> 1236,68 MW 
+        RMSE --> 1719,55 MW 
+        MAPE --> 9.17 % 
+        ME --> -40.67 MW  
+        MAE_top5 --> 1901,80 MW 
 
         Under-forecast (our result from the ME):
 
         Error = actual - forecast ("y - pred", modelling.py).
-        On ME: we get a negative value which means that the baseline is ~ -40,66 MW which indicates a slight over-forecast of about 40,66 MW.
+        On ME: we get a negative value which means that the baseline is ~ -40.66 MW which indicates a slight over-forecast of about 40.66 MW.
 
         Over-forecast:
 
-        If we had chosen to display the error as Error = forecast - actual, our ME value would then be positive: 40,66 MW, an indication of a small under-forecast.
+        If we had chosen to display the error as Error = forecast - actual, our ME value would then be positive: 40.66 MW, an indication of a small under-forecast.
         
 30) Tao Hong vanilla linear model predictions:
 
-        MAE --> 396,27 MW (396,2750552956701)
-        RMSE --> 521,26 MW (521,2625615739648)
-        MAPE --> 2,96 % (2,966182517833976)
-        ME --> 140,91 MW (140,91284201377937)
-        MAE_top5 --> 610,66 MW (610,6601099444198)
+        MAE --> 396.28 MW 
+        RMSE --> 521.26 MW 
+        MAPE --> 2.97 % 
+        ME --> 140.91 MW 
+        MAE_top5 --> 610.66 MW 
 
 ## Tree model parameters and results for each run
 
-31) Gradient boosted trees paramaters for the runs and results:
+31) Parameters and results for the raw model:
 
 Run 1:
 
@@ -287,11 +287,11 @@ Run 1:
         
         Results: 
 
-        MAE --> 708,96 MW (708,9642475194357)      
-        RMSE --> 848,36 MW (848,3616695308813)      
-        MAPE --> 5,32 % (5,3251328239625195)       
-        ME --> 669,22 MW (669,2241345710112)      
-        MAE_top5 --> 841,90 MW (841,9028475047786)  
+        MAE --> 708.96 MW       
+        RMSE --> 848.36 MW      
+        MAPE --> 5.32 %        
+        ME --> 669.22 MW       
+        MAE_top5 --> 841.90 MW   
 
 Run 2 --> Best run: 
 
@@ -304,11 +304,11 @@ Run 2 --> Best run:
 
         Results:
 
-        MAE --> 707,69 MW (707,6981190895476) -> ~ 1,26 MW better than Run 1       
-        RMSE --> 844,60 MW (844,6074413682167) -> ~ 3,75 MW better than Run 1    
-        MAPE --> 5,31 % (5,319915730300149) -> ~ 0,0052 % better than Run 1     
-        ME --> 668,14 MW (668,1438266831445) -> ~ 1,08 MW better than Run 1      
-        MAE_top5 --> 840,21 MW (840,2120046197618) -> ~ 1,69 MW better than Run 1
+        MAE --> 707.70 MW        
+        RMSE --> 844.61 MW 
+        MAPE --> 5.32 % 
+        ME --> 668.14 MW 
+        MAE_top5 --> 840.21 MW 
 
 Other top runs (only parameters):
 
@@ -317,11 +317,35 @@ Other top runs (only parameters):
         max_iter=300 with learning_rate=0.06
         max_iter=400 with learning_rate=0.05
 
-32) Raw-target trees under-forecast validation by 669 MW on average(ME ≈ MAE): 
+32) Raw-target trees under-forecast validation by 668 MW on average(ME ≈ MAE): 
 out-of-range behaviour appears per region of feature space (!), not only above
 the global maximum.
 
+33) Results for the difference model:
 
+        MAE --> 737.18 MW
+        RMSE --> 875.61 MW
+        MAPE --> 5.54 %
+        ME --> 685.05 MW
+        MAE_top5 --> 858.58 MW
+
+34) Results for the corrected / real model:
+
+        MAE --> 482.67 MW
+        RMSE --> 642.40 MW
+        MAPE --> 3.60 %
+        ME --> 152.30 MW
+        MAE_top5 --> 613.49 MW
+
+35) Arm B result (difference): 
+        
+        Difference target alone yielded no bias reduction on validation.
+
+36) Arms A, B and C:
+
+        A --> raw tree model 
+        B --> difference tree model
+        C --> corrected difference / real tree model
 
 
 
@@ -331,7 +355,7 @@ the global maximum.
 
 ## References
 
-Géron, A. (2017) Hands-On Machine Learning with Scikit-Learn and TensorFlow (First Edition). Sebastopol, CA: O’Reilly, pp. 195–199.   
+Géron, A. (2017) Hands-On Machine Learning with Scikit-Learn and TensorFlow 1st edn. Sebastopol, CA: O’Reilly, pp. 195–199.   
 
 Murphy, K.P. (2012) Machine learning: a probabilistic perspective. Cambridge, MA: MIT Press, pp. 543–563: trees and boosting.
 
