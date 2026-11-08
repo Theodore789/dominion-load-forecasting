@@ -274,26 +274,57 @@ sudden cold weather after a mild week last week gives errors of thousands of MWs
 
 ## Tree model parameters and results for each run
 
-31) Gradient boosted trees paramaters for the 1st run and results:
+31) Gradient boosted trees paramaters for the runs and results:
 
 Run 1:
 
         Parameters:
 
-        max_iter=500,                              100, 100, 300, 400, 400
-        learning_rate=0.05,                      0.05, 0.06, 0.06, 0.05, 0.06
+        max_iter=500, 
+        learning_rate=0.05                          
         early_stopping=False, 
         random_state=0
         
         Results: 
 
-        MAE --> 708,96 MW (708,9642475194357)       708.6278 (~0.3150), 705.8645 (~2.7620)
-        RMSE --> 848,36 MW (848,3616695308813)      852.2297 (~worse), 844.7154 (~7.6000)
-        MAPE --> 5,32 % (5,3251328239625195)        5.2486   (~0.750), 5.2524 (~worse)
-        ME --> 669,22 MW (669.2241345710112)        665.0321 (~4.2), 665.5980 (~worse)
-        MAE_top5 --> 841,90 MW (841.9028475047786)  1020.1089 (~worse), 952.4689 (~69.0000)
+        MAE --> 708,96 MW (708,9642475194357)      
+        RMSE --> 848,36 MW (848,3616695308813)      
+        MAPE --> 5,32 % (5,3251328239625195)       
+        ME --> 669,22 MW (669,2241345710112)      
+        MAE_top5 --> 841,90 MW (841,9028475047786)  
 
-Run 2: 
+Run 2 --> Best run: 
+
+        Parameters:
+
+        max_iter=400,                              
+        learning_rate=0.06,                      
+        early_stopping=False, 
+        random_state=0
+
+        Results:
+
+        MAE --> 707,69 MW (707,6981190895476) -> ~ 1,26 MW better than Run 1       
+        RMSE --> 844,60 MW (844,6074413682167) -> ~ 3,75 MW better than Run 1    
+        MAPE --> 5,31 % (5,319915730300149) -> ~ 0,0052 % better than Run 1     
+        ME --> 668,14 MW (668,1438266831445) -> ~ 1,08 MW better than Run 1      
+        MAE_top5 --> 840,21 MW (840,2120046197618) -> ~ 1,69 MW better than Run 1
+
+Other top runs (only parameters):
+
+        max_iter=100 with learning_rate=0.05
+        max_iter=100 with learning_rate=0.06
+        max_iter=300 with learning_rate=0.06
+        max_iter=400 with learning_rate=0.05
+
+32) Raw-target trees under-forecast validation by 669 MW on average(ME ≈ MAE): 
+out-of-range behaviour appears per region of feature space (!), not only above
+the global maximum.
+
+
+
+
+
 
 
 
