@@ -323,7 +323,7 @@ Other top runs (only parameters):
 out-of-range behaviour appears per region of feature space (!), not only above
 the global maximum.
 
-## Results on validation (2023, 8,664 scored hours)
+## Results on validation (2023 of 8,664 scored hours)
 
 Error = actual − forecast, so positive ME = under-forecast. All models are scored on the same hours.
 
@@ -335,7 +335,7 @@ Error = actual − forecast, so positive ME = under-forecast. All models are sco
 | Trees, arm B (difference target) | 737.18 | 875.61 | 5.54 | +685.05 | 858.58 |
 | Trees, arm C (difference target + relative features) | 482.67 | 642.40 | 3.60 | +152.30 | 613.49 |
 
-## Experiment B arms
+## Experiment arms
 
 All arms: same settings (max_iter 400, learning_rate 0.06, early_stopping False, random_state 0), same calendar and weather features (hour, day_of_week, month, is_holiday, temp_mean), same scored hours.
 
