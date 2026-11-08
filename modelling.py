@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import statsmodels.formula.api as smf
 from sklearn.ensemble import HistGradientBoostingRegressor
+from sklearn.base import clone
 from pathlib import Path
 
 
@@ -52,8 +53,6 @@ pred = df["lag_168"]
 y = df["Demand (MW)"]
 m = val & has_y & pred.notna()
 
-print(score(pred[m], y[m])) # naive baseline results
-
 # Professor Tao Hong's vanilla linear benchmark
 df["trend"] = np.arange(len(df))
 
@@ -67,9 +66,7 @@ model = smf.ols(formula, data=df[train & has_y])
 results = model.fit() 
 lin_pred = results.predict(df)
 
-print(score(lin_pred[m], y[m])) # linear model results
-
-# Gradient-boosted trees model
+# Gradient-boosted trees model (raw model)
 X_cols = ["lag_24", "lag_48", "lag_168", "level_7d", 
           "hour", "day_of_week", "month", "is_holiday",
           "temp_mean"
@@ -85,5 +82,18 @@ hgb_model.fit(df.loc[train & has_y, X_cols], y[train & has_y])
 hgb_pred = hgb_model.predict(df[X_cols])
 hgb_series = pd.Series(data=hgb_pred, index=df.index)
 
-print(score(hgb_series[m], y[m])) # gradient-boosted trees model results
+# the difference target (difference model)
+d = y - df["level_7d"]
+fit_rows = train & has_y & df["level_7d"].notna()
 
+hgb_diff_model = clone(hgb_model)
+
+hgb_diff_model.fit(df.loc[fit_rows, X_cols], d[fit_rows])
+hgb_diff_pred = hgb_diff_model.predict(df[X_cols])
+hgb_diff_series = pd.Series(data=hgb_diff_pred, index=df.index)
+
+diff_forecast = df["level_7d"] + hgb_diff_series
+
+print(hgb_diff_series[m].mean()) # mean predicted difference target
+print(d[m].mean()) # mean actual difference target
+print(score(diff_forecast[m], y[m]))
