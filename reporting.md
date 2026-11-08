@@ -345,6 +345,22 @@ All arms: same settings (max_iter 400, learning_rate 0.06, early_stopping False,
 | B (pre-registered) | d = demand − level_7d | same as A (absolute MW) | level_7d + predicted d | +685 | Does changing only the target remove the bias? **No** |
 | C (amendment, 8 Nov) | d = demand − level_7d | rel_24, rel_48, rel_168 (lag − level_7d); no level_7d | level_7d + predicted d | +152 | Does making the features relative remove it? **Mostly: −77%** |
 
+Mean predicted difference target: -697.6144128472386
+Mean actual difference target: -12.567476697505764
+
+B vs A: changing the target alone is of no consequence:
+
+        +668 MW --> +685 MW
+
+C vs B: removing the absolute level from the inputs is what removes the bias:
+
+        +685 MW --> +152 MW
+
+33) On our hypothesis MAE prediction number (< 5 % change):
+
+        The actul result is that the ME fell 32 %. 
+
+
 
 
 
