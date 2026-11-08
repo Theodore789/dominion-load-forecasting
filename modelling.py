@@ -96,4 +96,26 @@ diff_forecast = df["level_7d"] + hgb_diff_series
 
 print(hgb_diff_series[m].mean()) # mean predicted difference target
 print(d[m].mean()) # mean actual difference target
-print(score(diff_forecast[m], y[m]))
+
+# the corrected trees model (real model)
+X_rel = ["rel_24", "rel_48", "rel_168", "hour", 
+         "day_of_week", "month", "is_holiday", 
+         "temp_mean"
+        ]
+
+hgb_rel_model = clone(hgb_model)
+
+hgb_rel_model.fit(df.loc[fit_rows, X_rel], d[fit_rows])
+hgb_rel_pred = hgb_rel_model.predict(df[X_rel])
+hgb_rel_series = pd.Series(data=hgb_rel_pred, index=df.index)
+
+rel_forecast = df["level_7d"] + hgb_rel_series
+
+rows ={}
+rows["naive"] = score(pred[m], y[m])
+rows["linear"] = score(lin_pred[m], y[m])
+rows["raw"] = score(hgb_series[m], y[m])
+rows["difference"] = score(diff_forecast[m], y[m])
+rows["real"] = score(rel_forecast[m], y[m])
+
+print(pd.DataFrame(rows).T.round(2))
