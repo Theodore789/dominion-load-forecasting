@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import tabulate
 import statsmodels.formula.api as smf
 from sklearn.ensemble import HistGradientBoostingRegressor
 from sklearn.base import clone
@@ -114,12 +115,29 @@ hgb_rel_series = pd.Series(data=hgb_rel_pred, index=df.index)
 
 rel_forecast = df["level_7d"] + hgb_rel_series
 
-rows ={}
+# organized table
+rows = {}
 rows["naive"] = score(pred[m], y[m])
 rows["linear"] = score(lin_pred[m], y[m])
-rows["raw"] = score(hgb_series[m], y[m])
-rows["difference"] = score(diff_forecast[m], y[m])
-rows["difference_with_relative"] = score(rel_forecast[m], y[m])
+rows["A_raw"] = score(hgb_series[m], y[m])
+rows["B_diff_target"] = score(diff_forecast[m], y[m])
+rows["C_relative"] = score(rel_forecast[m], y[m])
 
 print(pd.DataFrame(rows).T.round(2))
+
+# monthly ME
+errs = pd.DataFrame(index=y[m].index)
+errs["linear"] = y[m] - lin_pred[m]
+errs["A_raw"] = y[m] - hgb_series[m]
+errs["B_diff_target"] = y[m] - diff_forecast[m]
+errs["C_relative"] = y[m] - rel_forecast[m]
+
+monthly = errs.groupby(local[m].month).mean()
+monthly.index.name = "local month"
+print(monthly.round(2).to_markdown())
+
+# monthly MAE
+monthly_mae = errs.abs().groupby(local[m].month).mean()
+monthly_mae.index.name = "local month"
+print(monthly_mae.round(2).to_markdown())
 
