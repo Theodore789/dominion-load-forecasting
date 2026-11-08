@@ -63,4 +63,9 @@
                 Difference tree model --> ME: 685 MW (!) 
 
                 Diagnosis:
-                level_7d as a feauture confounds structural growth with multi-day weather spells. An additional arm is therefore addded: difference target with load features expressed relative to level_7d (lag - level_7d) and level_7d removed as feature. All tree arms will be reported on the test set; the pre-registered arm is reported as registered.
+                
+                level_7d as a feauture confounds structural growth with multi-day weather spells. 
+                
+                An additional arm is therefore addded: difference target with load features expressed relative to level_7d (lag - level_7d) and level_7d removed as feature. 
+                
+                All three arms will be reported on the test set; the pre-registered arm is reported as registered.
