@@ -36,3 +36,7 @@ df["temp_cube"] = df["temp_mean"] ** 3
 df.to_csv(HERE / "data" / "features.csv")
 
 print(df.shape, df.columns.tolist())
+
+df["rel_24"] = df["lag_24"] - df["level_7d"]
+df["rel_48"] = df["lag_48"] - df["level_7d"]
+df["rel_168"] = df["lag_168"] - df["level_7d"]
