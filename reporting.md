@@ -321,6 +321,7 @@ Error = actual − forecast, so positive ME = under-forecast. All models are sco
 ## Experiment arms
 
 All arms: same settings (max_iter 400, learning_rate 0.06, early_stopping False, random_state 0), same calendar and weather features (hour, day_of_week, month, is_holiday, temp_mean), same scored hours.
+Arm A was refitted on fit_rows.
 
 | Arm | Target the trees learn | Load features | Forecast | Val. ME (MW) | Question it answers |
 |---|---|---|---|---|---|
@@ -328,21 +329,72 @@ All arms: same settings (max_iter 400, learning_rate 0.06, early_stopping False,
 | B (pre-registered) | d = demand − level_7d | same as A (absolute MW) | level_7d + predicted d | +685 | Does changing only the target remove the bias? **No** |
 | C (amendment, 8 Nov) | d = demand − level_7d | rel_24, rel_48, rel_168 (lag − level_7d); no level_7d | level_7d + predicted d | +152 | Does making the features relative remove it? **Mostly: −77%** |
 
-Mean predicted difference target: -697.6144128472386
-Mean actual difference target: -12.567476697505764
+33) Arms comparison:
 
-B vs A: changing the target alone is of no consequence:
+        B vs A: changing the target alone is of no consequence:
 
-        +668 MW --> +685 MW
+                +668 MW --> +685 MW
 
-C vs B: removing the absolute level from the inputs is what removes the bias:
+        C vs B: removing the absolute level from the inputs is what removes the bias:
 
-        +685 MW --> +152 MW
+                +685 MW --> +152 MW
 
-33) On our hypothesis MAE prediction number (< 5 % change):
+34) Arm B evidence:
+
+        Mean predicted difference target: -698 MW
+        
+        Mean actual difference target: -13 MW
+
+        The trees expected a drop that never came, which accounts for almost all of 
+        Arm B's +685 bias.
+
+35) On our hypothesis MAE prediction number (< 5 % change):
 
         The actul result is that the MAE fell 32 %. 
 
+## Results on monthly validation -only ME- (2023 of 8,664 scored hours)
+
+|   local month |   linear |   A_raw |   B_diff_target |   C_relative |
+|--------------:|---------:|--------:|----------------:|-------------:|
+|             1 |      142 |    1081 |            1056 |          426 |
+|             2 |       24 |     869 |             913 |          482 |
+|             3 |      178 |     773 |             771 |          130 |
+|             4 |      285 |     399 |             348 |          -50 |
+|             5 |      207 |     581 |             610 |          142 |
+|             6 |       68 |     743 |             782 |          447 |
+|             7 |      264 |     670 |             755 |           83 |
+|             8 |      104 |     544 |             511 |          -32 |
+|             9 |       90 |     533 |             544 |          -65 |
+|            10 |       11 |     667 |             616 |           58 |
+|            11 |       91 |     668 |             698 |           88 |
+|            12 |      213 |     600 |             631 |          139 |
+
+Arm C cut the tree's bias by 77% and their MAE by 32%, but on validation
+the interpretable linear benchmark is still the most accurate model. 
+
+The linear model's trend term handles growth "for free", while the trees need careful
+engineering just to catch up. 
+
+## Results on the fair monthly comparison -only MAE- (val on 2023 of 8,664 scored hours)
+
+|   local month |   linear |    A_raw |   B_diff_target |   C_relative |
+|--------------:|---------:|---------:|----------------:|-------------:|
+|             1 |  377.54  | 1102.04  |        1083.31  |      740.114 |
+|             2 |  369.296 |  879.497 |         921.6   |      702.173 |
+|             3 |  418.526 |  793.762 |         790.637 |      485.988 |
+|             4 |  431.89  |  479.767 |         450.358 |      321.989 |
+|             5 |  372.375 |  591.257 |         626.345 |      310.418 |
+|             6 |  459.145 |  760.419 |         802.25  |      541.741 |
+|             7 |  428.695 |  698.596 |         792.734 |      423.509 |
+|             8 |  392.289 |  653.755 |         670.101 |      610.875 |
+|             9 |  407.672 |  638.498 |         655.937 |      512.889 |
+|            10 |  304.112 |  675.325 |         634.285 |      246.001 |
+|            11 |  389.424 |  680.579 |         708.096 |      437.64  |
+|            12 |  406.003 |  663.039 |         719.06  |      473.488 |
+
+## MLP model trained on Arm C
+
+The MLP uses arm C's representation which is the best tree design on validation.
 
 
 
@@ -359,5 +411,4 @@ Murphy, K.P. (2012) Machine learning: a probabilistic perspective. Cambridge, MA
 MacKay, D.J.C. (2003) Information theory, inference, and learning algorithms. Cambridge: Cambridge University Press, pp. 527–533: MLPs.
 
 Hong, T. et al. (2020) ‘Energy Forecasting: A Review and Outlook’, IEEE Open Access Journal of Power and Energy, 7, pp. 376–388. Available at: https://doi.org/10.1109/OAJPE.2020.3029979.
-
 
