@@ -81,8 +81,9 @@ hgb_model = HistGradientBoostingRegressor(max_iter=400,
                                      random_state=0
                                      )
 
-hgb_results = hgb_model.fit(df.loc[train & has_y, X_cols], y[train & has_y])
-hgb_pred = hgb_results.predict(df[X_cols])
+hgb_model.fit(df.loc[train & has_y, X_cols], y[train & has_y])
+hgb_pred = hgb_model.predict(df[X_cols])
 hgb_series = pd.Series(data=hgb_pred, index=df.index)
 
-print(score(hgb_pred[m], y[m])) # gradient-boosted trees model results
+print(score(hgb_series[m], y[m])) # gradient-boosted trees model results
+
