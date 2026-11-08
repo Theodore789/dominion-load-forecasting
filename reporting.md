@@ -358,7 +358,7 @@ C vs B: removing the absolute level from the inputs is what removes the bias:
 
 33) On our hypothesis MAE prediction number (< 5 % change):
 
-        The actul result is that the ME fell 32 %. 
+        The actul result is that the MAE fell 32 %. 
 
 
 
