@@ -236,7 +236,9 @@ made it the index and sorted by it.
 
         Temperature check: 27.3 --> 745.29 --> 20,346.417
 
-        Final table shape: 70,128 x 15.
+        Late add (8 Nov 26'): rel_ columns: df["lag_"] - df["level-7d"]
+
+        Final table shape: 70,128 x 18.
 
 ## Modelling (modelling.py)  
 
