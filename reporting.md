@@ -274,7 +274,7 @@ sudden cold weather after a mild week last week gives errors of thousands of MWs
         ME --> 140.91 MW 
         MAE_top5 --> 610.66 MW 
 
-## Tree model parameters and results for each run
+## Raw tree model parameters and results for each run
 
 31) Parameters and results for the raw model:
 
@@ -323,31 +323,27 @@ Other top runs (only parameters):
 out-of-range behaviour appears per region of feature space (!), not only above
 the global maximum.
 
-33) Results for the difference model:
+## Results on validation (2023, 8,664 scored hours)
 
-        MAE --> 737.18 MW
-        RMSE --> 875.61 MW
-        MAPE --> 5.54 %
-        ME --> 685.05 MW
-        MAE_top5 --> 858.58 MW
+Error = actual − forecast, so positive ME = under-forecast. All models are scored on the same hours.
 
-34) Results for the corrected / real model:
+| Model | MAE (MW) | RMSE (MW) | MAPE (%) | ME (MW) | MAE_top5 (MW) |
+|---|---|---|---|---|---|
+| Seasonal naive (lag_168) | 1,236.68 | 1,1719.55 | 9.17 | −40.67 | 1,901.80 |
+| Tao Hong linear | **396.28** | **521.26** | **2.96** | +140.91 | **610.66** |
+| Trees, arm A (raw) | 707.70 | 844.61 | 5.32 | +668.14 | 840.21 |
+| Trees, arm B (difference target) | 737.18 | 875.61 | 5.54 | +685.05 | 858.58 |
+| Trees, arm C (difference target + relative features) | 482.67 | 642.40 | 3.60 | +152.30 | 613.49 |
 
-        MAE --> 482.67 MW
-        RMSE --> 642.40 MW
-        MAPE --> 3.60 %
-        ME --> 152.30 MW
-        MAE_top5 --> 613.49 MW
+## Experiment B arms
 
-35) Arm B result (difference): 
-        
-        Difference target alone yielded no bias reduction on validation.
+All arms: same settings (max_iter 400, learning_rate 0.06, early_stopping False, random_state 0), same calendar and weather features (hour, day_of_week, month, is_holiday, temp_mean), same scored hours.
 
-36) Arms A, B and C:
-
-        A --> raw tree model 
-        B --> difference tree model
-        C --> corrected difference / real tree model
+| Arm | Target the trees learn | Load features | Forecast | Val. ME (MW) | Question it answers |
+|---|---|---|---|---|---|
+| A (reference) | demand (MW) | lag_24, lag_48, lag_168, level_7d (absolute MW) | tree output | +668 | — |
+| B (pre-registered) | d = demand − level_7d | same as A (absolute MW) | level_7d + predicted d | +685 | Does changing only the target remove the bias? **No** |
+| C (amendment, 8 Nov) | d = demand − level_7d | rel_24, rel_48, rel_168 (lag − level_7d); no level_7d | level_7d + predicted d | +152 | Does making the features relative remove it? **Mostly: −77%** |
 
 
 
