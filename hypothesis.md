@@ -55,3 +55,12 @@
                 Final models are trained on Oct 2018 - Dec 2022 only, while 2023 is used only for choosing settings. 
                 
                 As a secondary analysis, the linear and best tree models are also refitted on Oct 2018 - Dec 2023 and evaluated on the same test hours; this does not change the pre-registered test of our experiment.
+
+        ## 8 November 2026:
+                On validation data, the difference target with the same absolute features as the raw model did not reduce bias:
+
+                Raw tree model --> ME: +668 MW
+                Difference tree model --> ME: 685 MW (!) 
+
+                Diagnosis:
+                level_7d as a feauture confounds structural growth with multi-day weather spells. An additional arm is therefore addded: difference target with load features expressed relative to level_7d (lag - level_7d) and level_7d removed as feature. All tree arms will be reported on the test set; the pre-registered arm is reported as registered.
