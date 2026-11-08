@@ -69,7 +69,10 @@ lin_pred = results.predict(df)
 
 # The 3 models: raw, difference and real
 
-# Gradient-boosted trees model (raw model)
+
+# Gradient-boosted trees models: Arms A, B and C
+
+# Arm A (raw model)
 fit_rows = train & has_y & df["level_7d"].notna()
 
 X_cols = ["lag_24", "lag_48", "lag_168", "level_7d", 
@@ -87,7 +90,7 @@ hgb_model.fit(df.loc[fit_rows, X_cols], y[fit_rows])
 hgb_pred = hgb_model.predict(df[X_cols])
 hgb_series = pd.Series(data=hgb_pred, index=df.index)
 
-# the difference target (difference model)
+# Arm B (difference model)
 d = y - df["level_7d"]
 
 hgb_diff_model = clone(hgb_model)
@@ -101,7 +104,7 @@ diff_forecast = df["level_7d"] + hgb_diff_series
 print(hgb_diff_series[m].mean()) # mean predicted difference target
 print(d[m].mean()) # mean actual difference target
 
-# the corrected trees model (difference + relative features model)
+# Arm C (difference + relative features model)
 X_rel = ["rel_24", "rel_48", "rel_168", "hour", 
          "day_of_week", "month", "is_holiday", 
          "temp_mean"
