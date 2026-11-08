@@ -34,14 +34,14 @@ print(df.index.tz) # UTC
 
 local = df.index.tz_convert("America/New_York") # day D = Virginia local day
 
-# splits for the model
+# splits for the models
 train = local.year <= 2022
 val = local.year == 2023
 test = local.year >= 2024
 
 print(train.sum(), val.sum(), test.sum())
 
-# 288 hours have no demand value
+# hours with no demand value
 has_y = df["Demand (MW)"].notna()
 
 print((train & ~has_y).sum(), 
@@ -54,7 +54,7 @@ pred = df["lag_168"]
 y = df["Demand (MW)"]
 m = val & has_y & pred.notna()
 
-# Professor Tao Hong's vanilla linear benchmark
+# professor Tao Hong's vanilla linear benchmark
 df["trend"] = np.arange(len(df))
 
 formula  = ('Q("Demand (MW)") ~ trend + C(month)' 
@@ -66,8 +66,6 @@ formula  = ('Q("Demand (MW)") ~ trend + C(month)'
 model = smf.ols(formula, data=df[train & has_y])
 results = model.fit() 
 lin_pred = results.predict(df)
-
-# The 3 models: raw, difference and real
 
 
 # Gradient-boosted trees models: Arms A, B and C
@@ -118,7 +116,7 @@ hgb_rel_series = pd.Series(data=hgb_rel_pred, index=df.index)
 
 rel_forecast = df["level_7d"] + hgb_rel_series
 
-# organized table
+# organized score table
 rows = {}
 rows["naive"] = score(pred[m], y[m])
 rows["linear"] = score(lin_pred[m], y[m])
@@ -128,7 +126,7 @@ rows["C_relative"] = score(rel_forecast[m], y[m])
 
 print(pd.DataFrame(rows).T.round(2))
 
-# monthly ME
+# monthly ME table
 errs = pd.DataFrame(index=y[m].index)
 errs["linear"] = y[m] - lin_pred[m]
 errs["A_raw"] = y[m] - hgb_series[m]
@@ -139,7 +137,7 @@ monthly = errs.groupby(local[m].month).mean()
 monthly.index.name = "local month"
 print(monthly.round(2).to_markdown())
 
-# monthly MAE
+# monthly MAE table
 monthly_mae = errs.abs().groupby(local[m].month).mean()
 monthly_mae.index.name = "local month"
 print(monthly_mae.round(2).to_markdown())
