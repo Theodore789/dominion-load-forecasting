@@ -245,7 +245,7 @@ made it the index and sorted by it.
         Final table shape: 70,128 x 18.
 
 
-## Modelling (modelling.py)  
+# Modelling (modelling.py)  
 
 27) Day D = Virginia local day. We are going to be using the local day because all our calendar features, holidays and missing days are in local time already. A grid operator also plans in local days.
 
@@ -281,9 +281,11 @@ sudden cold weather after a mild week last week gives errors of thousands of MWs
         MAE_top5 --> 610.66 MW 
 
 
-## Raw tree model parameters and results for the top run
+# Gradient boosted trees models:
 
-31) Parameters and results for the raw model:
+## Arm A (raw model) parameters and results for the top run
+
+31) Parameters and results for Arm A (raw model):
 
 Top run:
 
@@ -327,9 +329,9 @@ Error = actual − forecast, so positive ME = under-forecast. All models are sco
 | Trees, arm C (difference target + relative features) | 482.67 | 642.40 | 3.60 | +152.30 | 613.49 |
 
 
-## Experiment arms
+## Experiment Arms (A, B, C)
 
-All arms: same settings (max_iter 400, learning_rate 0.06, early_stopping False, random_state 0), same calendar and weather features (hour, day_of_week, month, is_holiday, temp_mean), same scored hours.
+All Arms: same settings (max_iter 400, learning_rate 0.06, early_stopping False, random_state 0), same calendar and weather features (hour, day_of_week, month, is_holiday, temp_mean), same scored hours.
 Arm A was refitted on fit_rows.
 
 | Arm | Target the trees learn | Load features | Forecast | Val. ME (MW) | Question it answers |
@@ -339,7 +341,7 @@ Arm A was refitted on fit_rows.
 | C (amendment, 8 Nov) | d = demand − level_7d | rel_24, rel_48, rel_168 (lag − level_7d); no level_7d | level_7d + predicted d | +152 | Does making the features relative remove it? **Mostly: −77%** |
 
 
-33) Arms comparison:
+33) Arms comparisons:
 
         B vs A: changing the target alone is of no consequence:
 
