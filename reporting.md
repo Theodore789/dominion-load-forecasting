@@ -1,4 +1,4 @@
-## Sources:
+# Sources:
 
 1) U.S. Energy Information Administration (2026) Hourly Electric Grid Monitor (Form EIA-930): balancing authority sub-region data, six-month files. 
 
@@ -10,7 +10,7 @@
 3) Hersbach, H. et al. (2020) ‘The ERA5 global reanalysis’, Quarterly Journal of the Royal Meteorological Society, 146(730), pp. 1999–2049. doi:10.1002/qj.3803.
 
 
-## Cleaning (data_handling.py)
+# Cleaning (data_handling.py)
 
 1) Combined the 17 files into one table of hourly Dominion demand and saved it, indexed by UTC time.
 
@@ -147,7 +147,7 @@ made it the index and sorted by it.
             the share of test hours above the training max --> 0.0161
 
 
-## Features (features.py)
+# Features (features.py)
 
 19) The fair fix for the data: min_periods=143
 
@@ -386,6 +386,7 @@ the interpretable linear benchmark is still the most accurate model.
 The linear model's trend term handles growth "for free", while the trees need careful
 engineering just to catch up. 
 
+
 ## Results on the fair monthly comparison -only MAE- (val on 2023 of 8,664 scored hours)
 
 |   local month |   linear |   A_raw |   B_diff_target |   C_relative |
@@ -404,12 +405,13 @@ engineering just to catch up.
 |            12 |   406    |  663.04 |          719.06 |       473.49 |
 
 
-## MLP model trained on Arm C
+# MLP model
 
-The MLP uses arm C's representation which is the best tree design on validation.
+The MLP  was trained on Arm C and it uses it's representation, which is the best tree design on validation.
 
-# MLP results and parameters -reference: Arm C MAE --> 482.67 MW
-        
+
+## MLP results and parameters -reference: Arm C MAE --> 482.67 MW
+
         1st run:
 
                 Parameters:
@@ -470,14 +472,14 @@ The MLP uses arm C's representation which is the best tree design on validation.
 | MLP_C_s4      |  555.43 |  747.15 |   4.16 | 103.3  |     612.81 |
 
 
-## Final findings
+# Final findings
         
         The relative representation (Arm C) works for neural networks as well.
 
          On our general problem, an interpretable model with the right structure (trend + temperature x month / hour) beats flexible models that have to **learn** that structure from about 4 years of data.
 
 
-## References
+# References
 
 Géron, A. (2017) Hands-On Machine Learning with Scikit-Learn and TensorFlow 1st edn. Sebastopol, CA: O’Reilly, pp. 195–199.   
 
