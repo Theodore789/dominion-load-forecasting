@@ -36,7 +36,7 @@
             Level --> mean load over the 7 days ending 24h before the target hour
 
     ## How I will judge it:
-            Mean error and MAE on the 389 hours
+            ME and MAE on the 389 hours
             MAE on the top 5% of hours
             Overall MAE
 
@@ -60,12 +60,12 @@
                 On validation data, the difference target with the same absolute features as the raw model did not reduce bias:
 
                 Raw tree model --> ME: +668 MW
-                Difference tree model --> ME: 685 MW (!) 
+                Difference tree model --> ME: +685 MW (!) 
 
                 Diagnosis:
                 
                 level_7d as a feauture confounds structural growth with multi-day weather spells. 
                 
-                An additional arm is therefore addded: difference target with load features expressed relative to level_7d (lag - level_7d) and level_7d removed as feature. 
+                An additional arm is therefore added (Arm C): difference target with load features expressed relative to level_7d (lag - level_7d) and level_7d removed as feature. 
                 
                 All three arms will be reported on the test set; the pre-registered arm is reported as registered.
