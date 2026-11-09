@@ -204,6 +204,6 @@ print(mlp_rows.std().round(2))
 # final model table
 print(table.round(2).to_markdown())
 
-
+# test hours check
 print((test & has_y & df["lag_168"].isna()).sum())
 print((test & has_y & df["lag_168"].notna()).sum())
