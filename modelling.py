@@ -4,6 +4,11 @@ import tabulate
 import statsmodels.formula.api as smf
 from sklearn.ensemble import HistGradientBoostingRegressor
 from sklearn.base import clone
+from sklearn.neural_network import MLPRegressor
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.impute import SimpleImputer
+from sklearn.pipeline import make_pipeline
+from sklearn.compose import make_column_transformer
 from pathlib import Path
 
 
@@ -142,3 +147,58 @@ monthly_mae = errs.abs().groupby(local[m].month).mean()
 monthly_mae.index.name = "local month"
 print(monthly_mae.round(2).to_markdown())
 
+
+# MLP model
+num_cols = ["rel_24", 
+            "rel_48", 
+            "rel_168", 
+            "temp_mean", 
+            "is_holiday"
+            ]
+
+cat_cols = ["hour", 
+            "day_of_week", 
+            "month"
+            ]
+
+mlp_cols = num_cols + cat_cols
+
+
+for seed in range(5):
+
+    num_path = make_pipeline(SimpleImputer(strategy="median"), 
+                             StandardScaler(),
+                             )
+
+    prep = make_column_transformer((num_path, num_cols), 
+                                   (OneHotEncoder(handle_unknown="ignore"), cat_cols),
+                                   )
+
+    mlp = make_pipeline(prep, MLPRegressor(hidden_layer_sizes=(64, 32),
+                                           alpha=1e-3, max_iter=200, early_stopping=False,
+                                           random_state=seed
+                                           ))
+
+    mlp.fit(df.loc[fit_rows, mlp_cols], d[fit_rows] / 1000)
+
+    print(mlp[-1].n_iter_)
+    print(mlp[-1].loss_curve_[-5])
+
+    d_gw = pd.Series(mlp.predict(df[mlp_cols]), index=df.index)
+
+    mlp_forecast = df["level_7d"] + 1000 * d_gw
+
+    rows[f"MLP_C_s{seed}"] = score(mlp_forecast[m], y[m])
+
+
+mlp_mae = pd.Series({k: v["MAE"] for k, v in rows.items() if k.startswith("MLP")})
+
+print(mlp_mae.mean(), mlp_mae.std())
+
+table = pd.DataFrame(rows).T
+mlp_rows = table[table.index.str.startswith("MLP")]
+
+print(mlp_rows.mean().round(2))
+print(mlp_rows.std().round(2))
+
+print(table.round(2).to_markdown())
