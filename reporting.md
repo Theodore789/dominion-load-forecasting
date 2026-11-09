@@ -9,6 +9,7 @@
 
 3) Hersbach, H. et al. (2020) ‘The ERA5 global reanalysis’, Quarterly Journal of the Royal Meteorological Society, 146(730), pp. 1999–2049. doi:10.1002/qj.3803.
 
+
 ## Cleaning (data_handling.py)
 
 1) Combined the 17 files into one table of hourly Dominion demand and saved it, indexed by UTC time.
@@ -89,6 +90,7 @@ made it the index and sorted by it.
     
         Demand is the average over the hour ending at t, while the temperature is an instant reading at t (a limitation).
 
+
 ## Exploration
 
 16) Temperature-demand scatter plot:
@@ -125,7 +127,8 @@ made it the index and sorted by it.
         to 0.89 in 2025 while the evening peak falls from 1.13 to 1.10. 
         
         The order is steady from year to year.
-        
+
+
 ## Experiment facts
 
 18) The training data peaks at 22,415 MW
@@ -142,7 +145,8 @@ made it the index and sorted by it.
             training max (2018-2022) --> 22,415 MW
             test hours (2024-2026) higher than the training max --> 389 hours
             the share of test hours above the training max --> 0.0161
-        
+
+
 ## Features (features.py)
 
 19) The fair fix for the data: min_periods=143
@@ -240,12 +244,14 @@ made it the index and sorted by it.
 
         Final table shape: 70,128 x 18.
 
+
 ## Modelling (modelling.py)  
 
 27) Day D = Virginia local day. We are going to be using the local day because all our calendar features, holidays and missing days are in local time already. A grid operator also plans in local days.
 
 28) lag_168, which is "the same hour last week", can't react when the weather changes;
 sudden cold weather after a mild week last week gives errors of thousands of MWs, and a holiday a week prior spoils the next week's forecast too.
+
 
 ## Baselines for the models
 
@@ -273,6 +279,7 @@ sudden cold weather after a mild week last week gives errors of thousands of MWs
         MAPE --> 2.97 % 
         ME --> 140.91 MW 
         MAE_top5 --> 610.66 MW 
+
 
 ## Raw tree model parameters and results for the top run
 
@@ -306,6 +313,7 @@ Other top runs (only parameters):
 out-of-range behaviour appears per region of feature space (!), not only above
 the global maximum.
 
+
 ## Results on validation (2023 of 8,664 scored hours)
 
 Error = actual − forecast, so positive ME = under-forecast. All models are scored on the same hours.
@@ -318,6 +326,7 @@ Error = actual − forecast, so positive ME = under-forecast. All models are sco
 | Trees, arm B (difference target) | 737.18 | 875.61 | 5.54 | +685.05 | 858.58 |
 | Trees, arm C (difference target + relative features) | 482.67 | 642.40 | 3.60 | +152.30 | 613.49 |
 
+
 ## Experiment arms
 
 All arms: same settings (max_iter 400, learning_rate 0.06, early_stopping False, random_state 0), same calendar and weather features (hour, day_of_week, month, is_holiday, temp_mean), same scored hours.
@@ -328,6 +337,7 @@ Arm A was refitted on fit_rows.
 | A (reference) | demand (MW) | lag_24, lag_48, lag_168, level_7d (absolute MW) | tree output | +676 | — |
 | B (pre-registered) | d = demand − level_7d | same as A (absolute MW) | level_7d + predicted d | +685 | Does changing only the target remove the bias? **No** |
 | C (amendment, 8 Nov) | d = demand − level_7d | rel_24, rel_48, rel_168 (lag − level_7d); no level_7d | level_7d + predicted d | +152 | Does making the features relative remove it? **Mostly: −77%** |
+
 
 33) Arms comparison:
 
@@ -351,6 +361,7 @@ Arm A was refitted on fit_rows.
 35) On our hypothesis MAE prediction number (< 5 % change):
 
         The actul result is that the MAE fell 32 %. 
+
 
 ## Results on monthly validation -only ME- (2023 of 8,664 scored hours)
 
@@ -392,14 +403,78 @@ engineering just to catch up.
 |            11 |   389.42 |  680.58 |          708.1  |       437.64 |
 |            12 |   406    |  663.04 |          719.06 |       473.49 |
 
+
 ## MLP model trained on Arm C
 
 The MLP uses arm C's representation which is the best tree design on validation.
 
+# MLP results and parameters -reference: Arm C MAE --> 482.67 MW
+        
+        1st run:
+
+                Parameters:
+                range(5)
+                
+                hidden_layer_sizes=(64, 32)
+                alpha=1e-3
+                max_iter=200
+                early_stopping=False
+                random_state=seed
+
+                Results:
+                MLP mean --> 556 MW (556.98)
+                MLP standard deviation --> 4 MW (4.67)
+                MAE 556 ± 4 MW
 
 
+        2nd run -Prediction: 400 iterations with all other parameters fixed (1st run) will improve MAE by more than 20 MW
+
+                Parameters changed:
+                max_iter=200 -> max_iter=400
+
+                Results:
+                MAE 575.55 ± 10.20 MW --> worse than the 1st run by ~19 ± 14.20 MW, so our prediction was off
 
 
+        3rd run -Prediction: alpha=1e-2 with all other parameters fixed (1st run) will improve MAE by more than 20 MW
+                
+                Parameters changed:
+                alpha=1e-3 -> alpha=1e-2
+
+                Results:
+                MAE 554.89 ± 13.66 MW --> better than the 1st run by ~2 ± 17 MW, so our prediction was off
+
+
+        4th run -Prediction: 1 only loop with all other parameters fixed (1st run) will improve MAE by more than 20 MW
+                
+                Parameters changed:
+                range(5) -> range(1)
+
+                Results:
+                MAE 553.65 ± 0 MW --> better than the 1st run by ~3 ± 4 MW, so our prediction was off
+
+
+## Final model table
+
+|               |     MAE |    RMSE |   MAPE |     ME |   MAE_top5 |
+|:--------------|--------:|--------:|-------:|-------:|-----------:|
+| naive         | 1236.68 | 1719.55 |   9.17 | -40.67 |    1901.8  |
+| linear        |  396.28 |  521.26 |   2.97 | 140.91 |     610.66 |
+| A_raw         |  717.37 |  854.84 |   5.39 | 676.21 |     855.27 |
+| B_diff_target |  737.18 |  875.61 |   5.54 | 685.05 |     858.58 |
+| C_relative    |  482.67 |  642.4  |   3.6  | 152.3  |     613.49 |
+| MLP_C_s0      |  553.32 |  744.24 |   4.14 | 183.22 |     681.74 |
+| MLP_C_s1      |  564.87 |  755.31 |   4.23 | 201.03 |     664.2  |
+| MLP_C_s2      |  557.38 |  744.2  |   4.17 | 104.95 |     699.63 |
+| MLP_C_s3      |  553.95 |  743.11 |   4.15 | 104.07 |     632.25 |
+| MLP_C_s4      |  555.43 |  747.15 |   4.16 | 103.3  |     612.81 |
+
+
+## Final findings
+        
+        The relative representation (Arm C) works for neural networks as well.
+
+         On our general problem, an interpretable model with the right structure (trend + temperature x month / hour) beats flexible models that have to **learn** that structure from about 4 years of data.
 
 
 ## References
@@ -411,4 +486,3 @@ Murphy, K.P. (2012) Machine learning: a probabilistic perspective. Cambridge, MA
 MacKay, D.J.C. (2003) Information theory, inference, and learning algorithms. Cambridge: Cambridge University Press, pp. 527–533: MLPs.
 
 Hong, T. et al. (2020) ‘Energy Forecasting: A Review and Outlook’, IEEE Open Access Journal of Power and Energy, 7, pp. 376–388. Available at: https://doi.org/10.1109/OAJPE.2020.3029979.
-
