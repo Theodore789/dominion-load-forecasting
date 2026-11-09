@@ -49,9 +49,9 @@ print(train.sum(), val.sum(), test.sum())
 # hours with no demand value
 has_y = df["Demand (MW)"].notna()
 
-print((train & ~has_y).sum(), 
-      (val & ~has_y).sum(), 
-      (test & ~has_y).sum()
+print((train & ~has_y).sum(), # 6 of the local days missing
+      (val & ~has_y).sum(), # 2 of the local days missing 
+      (test & ~has_y).sum() # 4 of the local days missing, 2 Nov days and 2 March days
       )
 
 # every model has to beat the baseline: lag_168 
@@ -203,3 +203,7 @@ print(mlp_rows.std().round(2))
 
 # final model table
 print(table.round(2).to_markdown())
+
+
+print((test & has_y & df["lag_168"].isna()).sum())
+print((test & has_y & df["lag_168"].notna()).sum())

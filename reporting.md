@@ -12,24 +12,20 @@
 
 # Cleaning (data_handling.py)
 
-1) Combined the 17 files into one table of hourly Dominion demand and saved it, indexed by UTC time.
+1) Combined the 17 EIA-930 files into one table of hourly Dominion demand and saved it, indexed by UTC time.
 
 2) We want the PJM grid operator's Dominion zone (code DOM) which covers most of Virginia and contains the data-centre cluster.
 
         Balancing Authority --> PJM 
         Sub-Region --> DOM
 
-3) Loop opens each file, keeps only the Dominion rows and puts them in a list, 
-"pd.concat" then stacks the 17 pieces into 1 table.
+3) From each file, we keep only the Dominion rows, put them in a list and then stack them all into 1 table.
 
-4) Turned the column "UTC Time at End of Hour" into real dates with "pd.to_datetime", 
-made it the index and sorted by it. 
-
-    With "format=" I tell pandas exactly how the dates are written.
+4) Turned the column "UTC Time at End of Hour" into real dates, made it the index and sorted by it. 
 
 5) From 1 July 2018 05:00 UTC to 17 October 2026 there are 72,720 rows. 
     
-    With "count()" we counted 70,700 so 2,020 rows have a timestamp but an empty demand value.
+    We counted 70,700 non-empty rows, so 2,020 rows have a timestamp but an empty demand value.
 
 6) Highest hourly value in our cleaned EIA-930 data: 25,413 MW (winter 2025-26).
 
@@ -77,7 +73,8 @@ made it the index and sorted by it.
 
     Start 1 October 2018, end 30 September 2026.
 
-13) 7 November clock-change days (25 h each), 4 March clock-changes (23 h each), plus on the 2nd of August 2020 (24 hours) = 12 days = 288 h
+13) 7 November clock-change days (25 h each), 4 March clock-changes (23 h each), 
+plus on the 2nd of August 2020 (24 hours) = 12 days = 288 h
 
 14) ERA5 via the Open-Meteo Historical API, hourly temperature_2m, GMT:
     
@@ -88,7 +85,8 @@ made it the index and sorted by it.
 
 15) Joined on the same timestamp, which is a simplification: 
     
-        Demand is the average over the hour ending at t, while the temperature is an instant reading at t (a limitation).
+        Demand is the average over the hour ending at t, 
+        while the temperature is an instant reading at t (a limitation).
 
 
 ## Exploration
@@ -108,7 +106,8 @@ made it the index and sorted by it.
         The whole U moves up by about the same amount everywhere.
         Peaks rose by roughly 5,000 MW too.
 
-        A shift that is added (the same MW at every temperature) rather than multiplied (the same percentage) shows that the experiment should express load as a difference from recent levels, not ratio.
+        A shift that is added (the same MW at every temperature) rather than multiplied (the same percentage), 
+        shows that the experiment should express load as a difference from recent levels, not ratio.
 
 17) Line plot:
 
@@ -144,7 +143,7 @@ made it the index and sorted by it.
             
             training max (2018-2022) --> 22,415 MW
             test hours (2024-2026) higher than the training max --> 389 hours
-            the share of test hours above the training max --> 0.0161
+            the share of test hours above the training max --> 1.6%
 
 
 # Features (features.py)
@@ -154,7 +153,7 @@ made it the index and sorted by it.
         level_7d --> the average demand over a past week (168 hours).
 
         min_periods = 143
-        this tells pandas to compute the average anyway as long as we have at least 143 hours there.
+        so we compute the average as long as we have at least 143 hours there.
 
         Our data are whole days so every day we keep has its night and its day so the average stays fair.
 
@@ -185,7 +184,7 @@ made it the index and sorted by it.
 
         For our example: 168 - g + 1 = 144 --> g = 25, so the missing day in November is 25 hours long, not 24. 
 
-        Window is w rows and a gap is g rows, the number of windows that contain the whole gap is w-g+1.
+        Window is w rows and a gap is g rows, the number of windows that contain the whole gap is w - g + 1.
 
         Our missing days are Virginia local days and the day the clock goes back has 25 hours. 
         The March clock-change day has 23; that's why the total is still 288 = 12 x 24.
@@ -202,9 +201,7 @@ made it the index and sorted by it.
 24) On holidays:
 
         On public holidays offices close, so demand looks like a weekend even on a weekday! 
-        If we don't flag the holiday days the model thinks Christmas Day is a normal Wednessday and over-forecasts.
-
-        Pandas has a ready-made list of US federal holidays.
+        If we don't flag the holiday days the model thinks Christmas Day is a normal Wednesday and over-forecasts.
 
         Oct-Dec 2018 --> 4 holidays
         2019 and 2020 --> 10 + 10 = 20 holidays
@@ -226,7 +223,7 @@ made it the index and sorted by it.
 
         Example: a + b * temp + c * temp ** 2
 
-        Why the cube: the square gives a symmetric U and the cube lets the heating side and the cooling side differ. 
+        The square gives a symmetric U and the cube lets the heating side and the cooling side differ. 
 
         Although trees don't need this, our Tao Hong linear benchmark does and it uses up to the cube.
 
@@ -238,19 +235,21 @@ made it the index and sorted by it.
 
         Calendar check: 12:00 UTC --> hour 8(July, EDT) and hour 7(January, EST).
 
-        Temperature check: 27.3 --> 745.29 --> 20,346.417
+        Temperature check: 27.3 (^1) --> 745.29 (^2) --> 20,346.417 (^3)
 
-        Late add (8 Nov 26'): rel_ columns: df["lag_"] - df["level-7d"]
+        Late add (8 Nov 2026): rel_ columns: df["lag_"] - df["level-7d"]
 
         Final table shape: 70,128 x 18.
 
 
 # Modelling (modelling.py)  
 
-27) Day D = Virginia local day. We are going to be using the local day because all our calendar features, holidays and missing days are in local time already. A grid operator also plans in local days.
+27) Day D = Virginia local day. We are going to be using the local day because all our calendar features, 
+holidays and missing days are in local time already. A grid operator also plans in local days.
 
 28) lag_168, which is "the same hour last week", can't react when the weather changes;
-sudden cold weather after a mild week last week gives errors of thousands of MWs, and a holiday a week prior spoils the next week's forecast too.
+sudden cold weather after a mild week last week gives errors of thousands of MWs, 
+and a holiday a week prior spoils the next week's forecast too.
 
 
 ## Baselines for the models
@@ -343,11 +342,11 @@ Arm A was refitted on fit_rows.
 
 33) Arms comparisons:
 
-        B vs A: changing the target alone is of no consequence:
+        A vs B: changing the target alone is of no consequence:
 
                 +668 MW --> +685 MW
 
-        C vs B: removing the absolute level from the inputs is what removes the bias:
+        B vs C : removing the absolute level from the inputs is what removes the bias:
 
                 +685 MW --> +152 MW
 
@@ -360,9 +359,9 @@ Arm A was refitted on fit_rows.
         The trees expected a drop that never came, which accounts for almost all of 
         Arm B's +685 bias.
 
-35) On our hypothesis MAE prediction number (< 5 % change):
+35) On our hypothesis's MAE prediction number (< 5 % change):
 
-        The actul result is that the MAE fell 32 %. 
+        The actul result is that the MAE fell by 32 %. 
 
 
 ## Results on monthly validation -only ME- (2023 of 8,664 scored hours)
@@ -382,11 +381,11 @@ Arm A was refitted on fit_rows.
 |            11 |    90.55 |  668.2  |          697.69 |        87.98 |
 |            12 |   213.36 |  600.49 |          631.26 |       138.87 |
 
-Arm C cut the tree's bias by 77% and their MAE by 32%, but on validation
+Arm C cut the tree's bias by 77% and their MAE by 32%, but on validation,
 the interpretable linear benchmark is still the most accurate model. 
 
 The linear model's trend term handles growth "for free", while the trees need careful
-engineering just to catch up. 
+engineering just to catch up!
 
 
 ## Results on the fair monthly comparison -only MAE- (val on 2023 of 8,664 scored hours)
@@ -412,7 +411,7 @@ engineering just to catch up.
 The MLP  was trained on Arm C and it uses it's representation, which is the best tree design on validation.
 
 
-## MLP results and parameters -reference: Arm C MAE --> 482.67 MW
+## MLP results and parameters (reference: Arm C MAE --> 482.67 MW)
 
         1st run:
 
@@ -449,13 +448,13 @@ The MLP  was trained on Arm C and it uses it's representation, which is the best
                 MAE 554.89 ± 13.66 MW --> better than the 1st run by ~2 ± 17 MW, so our prediction was off
 
 
-        4th run -Prediction: 1 only loop with all other parameters fixed (1st run) will improve MAE by more than 20 MW
+        4th run -Prediction: only 1 seed with all other parameters fixed (1st run) will improve MAE by more than 20 MW (compared fairly to a run with also range(1) but max_iter=400)
                 
                 Parameters changed:
                 range(5) -> range(1)
 
                 Results:
-                MAE 553.65 ± 0 MW --> better than the 1st run by ~3 ± 4 MW, so our prediction was off
+                MAE 553.32 (max_iter=200) --> MAE 553.65 (max_iter=400), +0.33 MW,  far below our 20 MW prediction
 
 
 ## Final model table
@@ -474,38 +473,87 @@ The MLP  was trained on Arm C and it uses it's representation, which is the best
 | MLP_C_s4      |  555.43 |  747.15 |   4.16 | 103.3  |     612.81 |
 
 
-## Frozen model features (9 Nov 2026) before the test evaluation
+## Frozen model report (9 Nov 2026) before the test evaluation
 
-Fixed from this commit: splits (local years: train ≤ 2022, val 2023, test ≥ 2024), training rows (fit_rows; linear: train & has_y), scored hours (has_y & lag_168 present), error = actual − forecast, score() metrics, and the models below. The test set is evaluated once. No refit for the main analysis; secondary refit on 2018–2023 for linear and the best tree model only.
+Nothing below changes after this commit and no model has been evaluated on the
+test set (local years ≥ 2024) before this commit.
 
-| Model | Target | Inputs | Settings |
-|---|---|---|---|
-| Seasonal naive | — | lag_168 | — |
-| Tao Hong linear (OLS) | demand (MW) | trend, C(month), C(day_of_week):C(hour), temp polynomials × (C(month) + C(hour)) | — |
-| Trees, arm A | demand (MW) | lag_24, lag_48, lag_168, level_7d, hour, day_of_week, month, is_holiday, temp_mean | HGB: max_iter 400, lr 0.06, early_stopping False, random_state 0 |
-| Trees, arm B | d = demand − level_7d | same as A | same as A |
-| Trees, arm C | d | rel_24, rel_48, rel_168, hour, day_of_week, month, is_holiday, temp_mean | same as A |
-| MLP (arm C representation) | d in GW | as C; numbers imputed + standardised, calendar one-hot | (64, 32), alpha 1e-3, max_iter 200, seeds 0–4 |
+### Data and splits
+- features.csv, 70,128 h (1 Oct 2018 – 30 Sep 2026). Day D = Virginia local day.
 
-Experiment B on test (as pre-registered + amendment 8 Nov): ME and MAE on the 389 hours above 22,415 MW, MAE_top5, overall MAE, 95% paired bootstrap CI over days, for arms A, B and C.
+- Train ≤ 2022 (37,277 h); validation 2023 (8,760 h); test ≥ 2024 (24,091 h).
+
+- Scored hours = split & has_y & lag_168 notna. Validation: 8,664 h. Test: 23,899 h.
+
+- Models are trained once on train only; 2023 was used only to choose settings.
+
+### Models
+| Model | Training rows | Target | Inputs | Settings |
+|---|---|---|---|---|
+| Seasonal naive | – | – | lag_168 | – |
+| Tao Hong linear | train & has_y | y | `Q("Demand (MW)") ~ trend + C(month) + C(day_of_week):C(hour) + (temp_mean + temp_sq + temp_cube) * (C(month) + C(hour))` | statsmodels OLS; trend = np.arange(len(df)) |
+| Trees A | fit_rows | y | lag_24, lag_48, lag_168, level_7d, hour, day_of_week, month, is_holiday, temp_mean | HGB: max_iter=400, learning_rate=0.06, early_stopping=False, random_state=0 |
+| Trees B | fit_rows | d = y − level_7d | as A | clone(A); forecast = level_7d + d̂ |
+| Trees C | fit_rows | d | rel_24, rel_48, rel_168, hour, day_of_week, month, is_holiday, temp_mean | clone(A); forecast = level_7d + d̂ |
+| MLP | fit_rows | d / 1000 (GW) | as C (impute+scale / one-hot) | (64, 32), alpha=1e-3, max_iter=200, seeds 0–4, mean ± sd |
+
+### Metrics
+MAE, RMSE, MAPE, ME (actual − forecast; positive = under-forecast), MAE_top5
+(threshold = 95th percentile of y on the scored hours of the split being evaluated).
+
+### Experiment B evaluation (test)
+- Hours above the training max 22,415 MW (n = 389): ME and MAE for arms A, B and C.
+
+- MAE_top5 and overall MAE for every model.
+
+- 95% paired bootstrap CI over local days: resample all test days with replacement,
+  n_boot = 2,000, rng seed 0; statistic = MAE_A − MAE_B and MAE_A − MAE_C on the
+  389 hours inside the resampled days. Bias reduction = 1 − |ME_arm| / |ME_A|.
+
+- Verdict rules (as in hypothesis.md), applied to arm B (as registered) and
+  arm C (amendment, 8 Nov), each compared with arm A:
+  
+  - Supported: on the 389 hours, the arm's mean under-forecast (ME) is at least 50% smaller than arm A's, and the 95% CI for the MAE difference excludes 0.
+  
+  - Partly supported: the CI excludes 0 but the reduction is below 50%.
+  
+  - Not supported: the CI includes 0, or the arm is worse than arm A.
+
+### Secondary analysis
+- Refit linear (train & has_y, ≤ 2023) and the arm C tree (fit_rows, ≤ 2023)
+  on Oct 2018 – Dec 2023; evaluated on the same 23,899 test hours.
+
+### Validation MAE (MW)
+- linear 396 < C 483 < MLP 556
+
+### Predictions (written before the test)
+- Ranking by test MAE: 1st C, 2nd MLP, 3rd linear; arms A/B and naive behind.
+
+  Reason: The linear model's trend is a straight line in time and from the test set it has to predict demand on 1-4 years after training. If data-centre growth accelerates, the linear model can fall behind further each year. On the other hand, Arm C's tree model and the MLP have level_7d from which they can follow the growth through.
+
+- Arm A, ME on the 389 hours: about 870 MW. Reason: tree forecasts stay at or
+  below roughly the training max, and these hours average 863 MW above it, so its ME should be at least about 863 MW, which is above its validation ME (676 MW).
+
+- Arm C, ME on the 389 hours: about 125 MW. Reason: Arm C's tree model doesn't predict the actual demand y but d = y - level_7d which indicates how far this hour sits above or below the past week's average. The growth is carried by level_7d, which is added back outside the tree, so the tree only has to predict d values inside its training range.
+
+- Experiment (hypothesis.md) verdict: 
+
+Arm B: not supported. Reason: with level_7d as an input the model confuses growth with weather spells (validation mean predicted d -698 MW vs actual -13 MW).
+
+Arm C: supported. Reason: no input carries the absolute scale, so the tree predicts d within its training range while level_7d carries the growth. On validation its bias fell 77% (676 -> 152 MW).
+
+### Rules after the freeze
+- No changes to models or settings
+
+- Figures and wording may change.
+
+- The test set is run once and the outputs are saved and committed immediately.
+
+- If a bug is found after the test: 
+        fix -> report old and new numbers -> add a dated note.
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# Final findings
+# Validation findings (on the year's 2023 hours)
         
         The relative representation (Arm C) works for neural networks as well.
 
