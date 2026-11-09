@@ -201,4 +201,5 @@ mlp_rows = table[table.index.str.startswith("MLP")]
 print(mlp_rows.mean().round(2))
 print(mlp_rows.std().round(2))
 
+# final model table
 print(table.round(2).to_markdown())
