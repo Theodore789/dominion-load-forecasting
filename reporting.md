@@ -474,6 +474,37 @@ The MLP  was trained on Arm C and it uses it's representation, which is the best
 | MLP_C_s4      |  555.43 |  747.15 |   4.16 | 103.3  |     612.81 |
 
 
+## Frozen model features (9 Nov 2026) before the test evaluation
+
+Fixed from this commit: splits (local years: train ≤ 2022, val 2023, test ≥ 2024), training rows (fit_rows; linear: train & has_y), scored hours (has_y & lag_168 present), error = actual − forecast, score() metrics, and the models below. The test set is evaluated once. No refit for the main analysis; secondary refit on 2018–2023 for linear and the best tree model only.
+
+| Model | Target | Inputs | Settings |
+|---|---|---|---|
+| Seasonal naive | — | lag_168 | — |
+| Tao Hong linear (OLS) | demand (MW) | trend, C(month), C(day_of_week):C(hour), temp polynomials × (C(month) + C(hour)) | — |
+| Trees, arm A | demand (MW) | lag_24, lag_48, lag_168, level_7d, hour, day_of_week, month, is_holiday, temp_mean | HGB: max_iter 400, lr 0.06, early_stopping False, random_state 0 |
+| Trees, arm B | d = demand − level_7d | same as A | same as A |
+| Trees, arm C | d | rel_24, rel_48, rel_168, hour, day_of_week, month, is_holiday, temp_mean | same as A |
+| MLP (arm C representation) | d in GW | as C; numbers imputed + standardised, calendar one-hot | (64, 32), alpha 1e-3, max_iter 200, seeds 0–4 |
+
+Experiment B on test (as pre-registered + amendment 8 Nov): ME and MAE on the 389 hours above 22,415 MW, MAE_top5, overall MAE, 95% paired bootstrap CI over days, for arms A, B and C.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # Final findings
         
         The relative representation (Arm C) works for neural networks as well.
@@ -487,6 +518,6 @@ Géron, A. (2017) Hands-On Machine Learning with Scikit-Learn and TensorFlow 1st
 
 Murphy, K.P. (2012) Machine learning: a probabilistic perspective. Cambridge, MA: MIT Press, pp. 543–563: trees and boosting.
 
-MacKay, D.J.C. (2003) Information theory, inference, and learning algorithms. Cambridge: Cambridge University Press, pp. 527–533: MLPs.
+MacKay, D.J.C. (2003) Information theory, inference, and learning algorithms. Cambridge: Cambridge University Press, pp. 527–529: MLPs.
 
 Hong, T. et al. (2020) ‘Energy Forecasting: A Review and Outlook’, IEEE Open Access Journal of Power and Energy, 7, pp. 376–388. Available at: https://doi.org/10.1109/OAJPE.2020.3029979.
