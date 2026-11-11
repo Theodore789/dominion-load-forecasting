@@ -55,9 +55,9 @@ print((train & ~has_y).sum(), # 6 of the local days missing
       )
 
 # every model has to beat the baseline: lag_168 
-pred = df["lag_168"]
+naive_pred = df["lag_168"]
 y = df["Demand (MW)"]
-m = val & has_y & pred.notna()
+m = val & has_y & naive_pred.notna()
 
 # professor Tao Hong's vanilla linear benchmark
 df["trend"] = np.arange(len(df))
@@ -123,7 +123,7 @@ rel_forecast = df["level_7d"] + hgb_rel_series
 
 # organized score table
 rows = {}
-rows["naive"] = score(pred[m], y[m])
+rows["naive"] = score(naive_pred[m], y[m])
 rows["linear"] = score(lin_pred[m], y[m])
 rows["A_raw"] = score(hgb_series[m], y[m])
 rows["B_diff_target"] = score(diff_forecast[m], y[m])
@@ -163,7 +163,7 @@ cat_cols = ["hour",
 
 mlp_cols = num_cols + cat_cols
 
-
+mlp_forecasts = {}
 for seed in range(5):
 
     num_path = make_pipeline(SimpleImputer(strategy="median"), 
@@ -187,7 +187,9 @@ for seed in range(5):
     d_gw = pd.Series(mlp.predict(df[mlp_cols]), index=df.index)
 
     mlp_forecast = df["level_7d"] + 1000 * d_gw
-
+    
+    mlp_forecasts[seed] = mlp_forecast
+    
     rows[f"MLP_C_s{seed}"] = score(mlp_forecast[m], y[m])
 
 
@@ -207,3 +209,64 @@ print(table.round(2).to_markdown())
 # test hours check
 print((test & has_y & df["lag_168"].isna()).sum())
 print((test & has_y & df["lag_168"].notna()).sum())
+
+
+# measures taken to actually validate on "val" and test on "test"
+SPLIT = "val"
+
+eval_split = val if SPLIT == "val" else test
+m_eval = eval_split & has_y & df["lag_168"].notna()
+
+expected = {"val": 8664, "test": 23899}
+assert m_eval.sum() == expected[SPLIT]
+
+rows1 = {}
+rows1["naive"] = score(naive_pred[m_eval], y[m_eval])
+rows1["linear"] = score(lin_pred[m_eval], y[m_eval])
+rows1["A_raw"] = score(hgb_series[m_eval], y[m_eval])
+rows1["B_diff_target"] = score(diff_forecast[m_eval], y[m_eval])
+rows1["C_relative"] = score(rel_forecast[m_eval], y[m_eval])
+
+for seed in range(5):
+
+    rows1[f"MLP_C_s{seed}"] = score(mlp_forecasts[seed][m_eval], y[m_eval])
+
+print(pd.DataFrame(rows1).T.round(2))
+
+
+# every model has a forecast for every one of the 23,899 test hours
+test_m = test & has_y & df["lag_168"].notna()
+
+print(naive_pred.reindex(df.index)[test_m].isna().sum(), 
+      lin_pred.reindex(df.index)[test_m].isna().sum(), 
+      hgb_series.reindex(df.index)[test_m].isna().sum(), 
+      diff_forecast.reindex(df.index)[test_m].isna().sum(), 
+      rel_forecast.reindex(df.index)[test_m].isna().sum(), 
+      )
+      
+for seed in range(5):
+
+    # whether the five MLPs have any missing forecasts
+    print(mlp_forecasts[seed].reindex(df.index)[test_m].isna().sum())
+
+
+train_max = y[train].max()
+
+if SPLIT == "val":
+    rec_threshold = y[m_eval].quantile(0.99) # stand-in, dry run only
+else:
+    rec_threshold = train_max
+
+rec = m_eval & (y > rec_threshold)
+
+rows_rec = {}
+rows_rec["A_raw"] = score(hgb_series[rec], y[rec])
+rows_rec["B_diff_target"] = score(diff_forecast[rec], y[rec])
+rows_rec["C_relative"] = score(rel_forecast[rec], y[rec])
+
+# dry-run numbers on a stand-in threshold --> the code works
+print(pd.DataFrame(rows_rec).T.round(2))
+
+print(train_max, round(rec_threshold, 1), rec.sum()) 
+
+print((test_m & (y > train_max)).sum()) # pred --> 389 (from hypothesis.md)
