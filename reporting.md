@@ -553,6 +553,9 @@ Arm C: supported. Reason: no input carries the absolute scale, so the tree predi
         fix -> report old and new numbers -> add a dated note.
 
 
+### Last commit after the freeze: 205fc83
+
+
 # Validation findings (on the year's 2023 hours)
         
         The relative representation (Arm C) works for neural networks as well.
