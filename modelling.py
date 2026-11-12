@@ -219,7 +219,7 @@ print((test & has_y & df["lag_168"].notna()).sum())
 
 
 # measures taken to actually validate on "val" and test on "test"
-SPLIT = "val"
+SPLIT = "test"
 
 eval_split = val if SPLIT == "val" else test
 m_eval = eval_split & has_y & df["lag_168"].notna()
