@@ -586,6 +586,13 @@ The floor of daily peak demand rose faster from 2023 onwards, consistent with th
 
 - Joint Legislative Audit and Review Commission (2024) Data centers in Virginia 2024. Report 598. Richmond, VA: Commonwealth of Virginia. Available at: https://jlarc.virginia.gov/pdfs/reports/Rpt598.pdf (Accessed: 12 November 2026)
 
+- Unofficial information: 
+Virginia listed Data-centres in 20 Oct 2026 -> 674
+Virginia listed Data-centres in 12 Nov 2026 -> 718
+
+Number of listed Data-centres in Virginia increased by 6.52 % in just 23 days!
+https://www.datacentermap.com/usa/virginia/
+
 
 # References
 
