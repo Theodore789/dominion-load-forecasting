@@ -558,12 +558,12 @@ Arm C: supported. Reason: no input carries the absolute scale, so the tree predi
 
 # Validation findings (on the year's 2023 hours)
         
-        The relative representation (Arm C) works for neural networks as well.
+The relative representation (Arm C) works for neural networks as well.
 
-         On our general problem, an interpretable model with the right structure (trend + temperature x month / hour) beats flexible models that have to **learn** that structure from about 4 years of data.
+On validation, an interpretable model (linear) with the right structure (trend + temperature x month / hour) beats flexible models that have to **learn** that structure from about 4 years of data.
 
 
-# Test Results
+# Test Results (test_output.txt)
 Model Ranking (top 3):
 
 1st -> Arm C tree
@@ -580,14 +580,14 @@ Additionaly, on hypothesis.md, we predicted that overall MAE would change by les
 It changed by -64 %, so, this prediction of ours turned out to be **false**.
 
 
-# Figure 1: the maximum hourly demand of each day of each year (2018-2026)
+# Figure 1 (figures.py): the maximum hourly demand of each day of each year (2018-2026)
 
 The floor of daily peak demand rose faster from 2023 onwards, consistent with the reported acceleration of data-centre construction after late 2022:
 
 - Joint Legislative Audit and Review Commission (2024) Data centers in Virginia 2024. Report 598. Richmond, VA: Commonwealth of Virginia. Available at: https://jlarc.virginia.gov/pdfs/reports/Rpt598.pdf (Accessed: 12 November 2026)
 
 - Unofficial information: 
-Virginia listed Data-centres in 20 Oct 2026 -> 674
+Virginia listed Data-centres in 20 Oct 2026 -> 674,
 Virginia listed Data-centres in 12 Nov 2026 -> 718
 
 Number of listed Data-centres in Virginia increased by 6.52 % in just 23 days!
