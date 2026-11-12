@@ -501,7 +501,7 @@ test set (local years ≥ 2024) before this commit.
 MAE, RMSE, MAPE, ME (actual − forecast; positive = under-forecast), MAE_top5
 (threshold = 95th percentile of y on the scored hours of the split being evaluated).
 
-### Experiment B evaluation (test)
+### Experiment evaluation (test)
 - Hours above the training max 22,415 MW (n = 389): ME and MAE for arms A, B and C.
 
 - MAE_top5 and overall MAE for every model.
@@ -561,6 +561,30 @@ Arm C: supported. Reason: no input carries the absolute scale, so the tree predi
         The relative representation (Arm C) works for neural networks as well.
 
          On our general problem, an interpretable model with the right structure (trend + temperature x month / hour) beats flexible models that have to **learn** that structure from about 4 years of data.
+
+
+# Test Results
+Model Ranking (top 3):
+
+1st -> Arm C tree
+2nd -> MLP (5 seeds)
+3rd -> linear
+
+So our final ranking prediction was **exactly right**: 
+
+The linear model went from best on validation to third on test; it was the leader on validation data but underperformed when it came to the actual test data.
+
+
+Additionaly, on hypothesis.md, we predicted that overall MAE would change by less than 5 %:
+
+It changed by -64 %, so, this prediction of ours turned out to be **false**.
+
+
+# Figure 1: the maximum hourly demand of each day of each year (2018-2026)
+
+The floor of daily peak demand rose faster from 2023 onwards, consistent with the reported acceleration of data-centre construction after late 2022:
+
+- Joint Legislative Audit and Review Commission (2024) Data centers in Virginia 2024. Report 598. Richmond, VA: Commonwealth of Virginia. Available at: https://jlarc.virginia.gov/pdfs/reports/Rpt598.pdf (Accessed: 12 November 2026)
 
 
 # References
