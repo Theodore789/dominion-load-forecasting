@@ -618,6 +618,16 @@ The floor rose by about 468 MW per year in 2019-2022 and about 761 MW per year i
 15°C -> 3,487 MW
 30°C -> 4,452 MW
 
+The whole curve rose by about 3,500 MW at every temperature between 2019 and 2025, 
+with roughly 700-1,000 MW extra at the cold and hot extremes.
+
+This result supports our relative tree model (C) because its difference target removes the large shared shift.
+The extra amount at the extremes is the part the model still has to learn from temperature.
+
+
+# Note on modelling.py:
+13 Nov 2026 -> added a forecast export without changing any model or settings
+
 # References
 
 [1] Géron, A. (2017) Hands-On Machine Learning with Scikit-Learn and TensorFlow 1st edn. Sebastopol, CA: O’Reilly, pp. 195–199.   
