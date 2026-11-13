@@ -79,23 +79,15 @@ for year, c in zip(years, colors):
                color=c, fontsize=8, va="center")
 
 ax2.set_xlabel("Temperature (°C)")
-ax2.set_ylabel("Mean hourly demand (MW)")
-ax2.set_title("The whole temperature-demand curve shifts upward each year")
+ax2.set_ylabel("Mean hourly demand (MW)", labelpad=8)
+ax2.set_title("The whole temperature-demand curve shifts upwards each year")
 ax2.yaxis.set_major_formatter(StrMethodFormatter("{x:,.0f}"))
 ax2.spines[["top", "right"]].set_visible(False)
+ax2.set_xlim(curve.index.min() - 1, curve.index.max() + 4)
+plt.subplots(figsize=(6.5, 2.6), layout="constrained")
 
-
-
-
-
-
-
-
-
-
-
-
-
+gap = curve[2025] - curve[2019]
+print(gap.loc[[0, 15, 30]].round(0))
 
 fig2.savefig(HERE / "figures" / "fig2_temperature.pdf", bbox_inches="tight")
 fig2.savefig(HERE / "figures" / "fig2_temperature.png", dpi=300, bbox_inches="tight") 
