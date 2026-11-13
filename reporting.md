@@ -609,8 +609,14 @@ It changed by -64% (arm A -> arm C), so, this prediction of ours turned out to b
 
 The floor of daily peak demand rose throughout 2019-2026, and more steeply from 2024, consistent with JLARC's  finding that data centres are the main driver of Virginia's projected demand growth (JLARC, 2024, p.ii) [3].
 
-- The rise in MW from 2019 to 2022: 13.43%, 2022 to 2025: 19.26% and overall 2019-2025: 35.28% (figures.py, Figure 1).
+The floor rose by about 468 MW per year in 2019-2022 and about 761 MW per year in 2022-2025, 1.63 times faster.
 
+# Figure 2: temperature-demand curve
+
+2025-2019 gap at three temperatures:
+0°C -> 4,209 MW
+15°C -> 3,487 MW
+30°C -> 4,452 MW
 
 # References
 
