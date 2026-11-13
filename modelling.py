@@ -218,7 +218,7 @@ print((test & has_y & df["lag_168"].isna()).sum())
 print((test & has_y & df["lag_168"].notna()).sum())
 
 
-# measures taken to actually validate on "val" and test on "test"
+# switch
 SPLIT = "test"
 
 eval_split = val if SPLIT == "val" else test
@@ -357,7 +357,23 @@ print(f"Pre-registered experiment on {SPLIT}")
 for arm, diff, ci, red in [("B", point_diff_A_to_B, ci_B, red_B),
                            ("C", point_diff_A_to_C, ci_C, red_C)]:
     
-    print(f"Arm {arm}: MEA_A - MAE_{arm} = {diff:.1f} MW | "
+    print(f"Arm {arm}: MAE_A - MAE_{arm} = {diff:.1f} MW | "
           f"95% CI [{ci[0]:.1f}, {ci[1]:.1f}] | "
           f"bias reduction = {red:.1%} | "
           f"verdict = {verdict(ci, red)}")
+
+
+if SPLIT == "test":
+    out = pd.DataFrame({"y": y, "naive": naive_pred,
+                         "linear": lin_pred,
+                         "A": hgb_series, 
+                         "B": diff_forecast,
+                         "C": rel_forecast,
+                         "MLP": pd.concat(mlp_forecasts, axis=1).mean(axis=1)
+                         })
+
+    out["record"] = rec
+    out[m_eval].to_csv(HERE / "data" / "test_forecasts.csv")
+    
+    assert len(out[m_eval]) == 23899
+    assert out.loc[m_eval, "record"].sum() == 389
