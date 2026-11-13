@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pandas as pd
 import matplotlib.pyplot as plt
-from matplotlib.ticker import StrMethodFormatter
+from matplotlib.ticker import StrMethodFormatter, MaxNLocator
 
 plt.rcParams["font.size"] = 9
 
@@ -11,6 +11,7 @@ df = pd.read_csv(HERE / "data" / "features.csv", index_col=0, parse_dates=True)
 
 local = df.index.tz_convert("America/New_York")  # day D = Virginia local day
 y = df["Demand (MW)"]
+
 
 # Figure 1: the maximum hourly demand of each day of each year (2018-2026)
 
@@ -72,6 +73,7 @@ years = [2019, 2021, 2023, 2025]
 colors = plt.cm.Blues([0.4, 0.6, 0.7, 1.0])
 
 fig2, ax2 = plt.subplots(figsize=(6.5, 2.6))
+
 for year, c in zip(years, colors):
       ax2.plot(curve.index, curve[year], color=c, linewidth=1.5)
       last = curve[year].last_valid_index()
@@ -84,10 +86,51 @@ ax2.set_title("The whole temperature-demand curve shifts upwards each year")
 ax2.yaxis.set_major_formatter(StrMethodFormatter("{x:,.0f}"))
 ax2.spines[["top", "right"]].set_visible(False)
 ax2.set_xlim(curve.index.min() - 1, curve.index.max() + 4)
+
 plt.subplots(figsize=(6.5, 2.6), layout="constrained")
 
 gap = curve[2025] - curve[2019]
 print(gap.loc[[0, 15, 30]].round(0))
 
 fig2.savefig(HERE / "figures" / "fig2_temperature.pdf", bbox_inches="tight")
-fig2.savefig(HERE / "figures" / "fig2_temperature.png", dpi=300, bbox_inches="tight") 
+fig2.savefig(HERE / "figures" / "fig2_temperature.png", dpi=300, bbox_inches="tight")
+
+
+# Figure 3: model predictions and actual results on the top 389 hours of the test data
+
+f = pd.read_csv(HERE / "data" / "test_forecasts.csv", index_col=0, parse_dates=True)
+rec_f = f[f["record"]]
+lo, hi = rec_f["y"].min(), rec_f["y"].max()
+
+fig3, ax3 = plt.subplots(1, 3, figsize=(6.5, 2.4), sharex=True, sharey=True, layout="constrained")
+
+for ax, arm in zip(ax3, ["A", "B", "C"]):
+      ax.scatter(rec_f["y"], rec_f[arm], s=5, alpha=0.4, color="#1f3b5c")
+      ax.plot([lo, hi], [lo, hi], "k--", linewidth=1)
+      ax.axhline(train_max, linestyle=":", color="grey", linewidth=1)
+      me = (rec_f["y"] - rec_f[arm]).mean()
+      ax.set_title(f"Arm {arm}: ME = {me:,.0f} MW", fontsize=9)
+      
+      ax.xaxis.set_major_formatter(StrMethodFormatter("{x:,.0f}"))
+      ax.yaxis.set_major_formatter(StrMethodFormatter("{x:,.0f}"))
+      ax.xaxis.set_major_locator(MaxNLocator(3))
+      ax.spines[["top", "right"]].set_visible(False)
+
+ax3[0].set_ylabel("Forecast (MW)")
+fig3.supxlabel("Actual demand (MW)")
+ax3[0].text(lo, train_max + 150, "training max", fontsize=7, color="grey")
+fig3.suptitle("On record hours, arm A stays below the old maximum, while arm C follows the new records")
+
+fig3.savefig(HERE / "figures" / "fig3_preds_and_results.pdf", bbox_inches="tight")
+fig3.savefig(HERE / "figures" / "fig3_preds_and_results.png", dpi=300, bbox_inches="tight")
+
+if len(rec_f) == 389:
+      print("True")
+else:
+      print("False")
+
+
+# Figure 4: monthly test bias by model
+
+ 
+
