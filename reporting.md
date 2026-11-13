@@ -10,6 +10,31 @@
 3) Hersbach, H. et al. (2020) ‘The ERA5 global reanalysis’, Quarterly Journal of the Royal Meteorological Society, 146(730), pp. 1999–2049. doi:10.1002/qj.3803.
 
 
+# About Data centres
+Data centers are specialized facilities that manage, pro-
+cess, and share large amounts of data. They enable the
+digital services that people rely on daily, including web-
+sites, electronic applications, and cloud-based platforms,
+such as email and media streaming. Northern Virginia is
+the largest data center market in the world, constituting
+13 percent of all reported data center operational capac-
+ity globally and 25 percent of capacity in the Americas.
+Multiple factors have contributed to Northern Virginia’s
+market prominence, including a strong fiber network,
+supply of reliable cheap energy, available land, proximity
+to major national customers, and the creation of a state
+data center tax incentive. The data center industry is
+growing rapidly in Virginia, both in established markets
+and newer ones. Significant new market growth is ex-
+pected in counties outside of Northern Virginia and
+along the I-95 corridor to Central Virginia.
+
+- [3] (p.i) 
+
+
+
+
+
 # Cleaning (data_handling.py)
 
 1) Combined the 17 EIA-930 files into one table of hourly Dominion demand and saved it, indexed by UTC time.
@@ -280,7 +305,7 @@ and a holiday a week prior spoils the next week's forecast too.
         MAE_top5 --> 610.66 MW 
 
 
-# Gradient boosted trees models:
+# Gradient boosted trees models: [1], [5]
 
 ## Arm A (raw model) parameters and results for the top run
 
@@ -406,7 +431,7 @@ engineering just to catch up!
 |            12 |   406    |  663.04 |          719.06 |       473.49 |
 
 
-# MLP model
+# MLP model [4]
 
 The MLP  was trained on Arm C and it uses it's representation, which is the best tree design on validation.
 
@@ -497,8 +522,8 @@ test set (local years ≥ 2024) before this commit.
 | Trees C | fit_rows | d | rel_24, rel_48, rel_168, hour, day_of_week, month, is_holiday, temp_mean | clone(A); forecast = level_7d + d̂ |
 | MLP | fit_rows | d / 1000 (GW) | as C (impute+scale / one-hot) | (64, 32), alpha=1e-3, max_iter=200, seeds 0–4, mean ± sd |
 
-### Metrics
-MAE, RMSE, MAPE, ME (actual − forecast; positive = under-forecast), MAE_top5
+### Metrics [2]
+MAE, RMSE, MAPE, ME (actual − forecast; positive = under-forecast), MAE_top5 
 (threshold = 95th percentile of y on the scored hours of the split being evaluated).
 
 ### Experiment evaluation (test)
@@ -556,7 +581,7 @@ Arm C: supported. Reason: no input carries the absolute scale, so the tree predi
 ### Last commit after the freeze: 205fc83
 
 
-# Validation findings (on the year's 2023 hours)
+# Validation findings (2023, 8,664 hours)
         
 The relative representation (Arm C) works for neural networks as well.
 
@@ -570,36 +595,31 @@ Model Ranking (top 3):
 2nd -> MLP (5 seeds)
 3rd -> linear
 
-So our final ranking prediction was **exactly right**: 
+So our final ranking prediction was **exactly right**: linear's test ME was +913 MW, so its straight-line trend fell behind the growth
 
 The linear model went from best on validation to third on test; it was the leader on validation data but underperformed when it came to the actual test data.
 
 
-Additionaly, on hypothesis.md, we predicted that overall MAE would change by less than 5 %:
+Additionally, on hypothesis.md, we predicted that overall MAE would change by less than 5%:
 
-It changed by -64 %, so, this prediction of ours turned out to be **false**.
+It changed by -64% (arm A -> arm C), so, this prediction of ours turned out to be **false**.
 
 
 # Figure 1 (figures.py): the maximum hourly demand of each day of each year (2018-2026)
 
-The floor of daily peak demand rose faster from 2023 onwards, consistent with the reported acceleration of data-centre construction after late 2022:
+The floor of daily peak demand rose throughout 2019-2026, and more steeply from 2024, consistent with JLARC's  finding that data centres are the main driver of Virginia's projected demand growth (JLARC, 2024, p.ii) [3].
 
-- Joint Legislative Audit and Review Commission (2024) Data centers in Virginia 2024. Report 598. Richmond, VA: Commonwealth of Virginia. Available at: https://jlarc.virginia.gov/pdfs/reports/Rpt598.pdf (Accessed: 12 November 2026)
-
-- Unofficial information: 
-Virginia listed Data-centres in 20 Oct 2026 -> 674,
-Virginia listed Data-centres in 12 Nov 2026 -> 718
-
-Number of listed Data-centres in Virginia increased by 6.52 % in just 23 days!
-https://www.datacentermap.com/usa/virginia/
+- The rise in MW from 2019 to 2022: 13.43%, 2022 to 2025: 19.26% and overall 2019-2025: 35.28% (figures.py, Figure 1).
 
 
 # References
 
-Géron, A. (2017) Hands-On Machine Learning with Scikit-Learn and TensorFlow 1st edn. Sebastopol, CA: O’Reilly, pp. 195–199.   
+[1] Géron, A. (2017) Hands-On Machine Learning with Scikit-Learn and TensorFlow 1st edn. Sebastopol, CA: O’Reilly, pp. 195–199.   
 
-Murphy, K.P. (2012) Machine learning: a probabilistic perspective. Cambridge, MA: MIT Press, pp. 543–563: trees and boosting.
+[2] Hong, T. et al. (2020) ‘Energy Forecasting: A Review and Outlook’, IEEE Open Access Journal of Power and Energy, 7, pp. 376–388. Available at: https://doi.org/10.1109/OAJPE.2020.3029979.
 
-MacKay, D.J.C. (2003) Information theory, inference, and learning algorithms. Cambridge: Cambridge University Press, pp. 527–529: MLPs.
+[3] Joint Legislative Audit and Review Commission (2024) Data centers in Virginia 2024. Report 598. Richmond, VA: Commonwealth of Virginia. Available at: https://jlarc.virginia.gov/pdfs/reports/Rpt598.pdf (Accessed: 12 November 2026).
 
-Hong, T. et al. (2020) ‘Energy Forecasting: A Review and Outlook’, IEEE Open Access Journal of Power and Energy, 7, pp. 376–388. Available at: https://doi.org/10.1109/OAJPE.2020.3029979.
+[4] MacKay, D.J.C. (2003) Information theory, inference, and learning algorithms. Cambridge: Cambridge University Press, pp. 527–529: MLPs.
+
+[5] Murphy, K.P. (2012) Machine learning: a probabilistic perspective. Cambridge, MA: MIT Press, pp. 543–563: trees and boosting.
