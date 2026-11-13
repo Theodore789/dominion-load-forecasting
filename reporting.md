@@ -624,6 +624,14 @@ with roughly 700-1,000 MW extra at the cold and hot extremes.
 This result supports our relative tree model (C) because its difference target removes the large shared shift.
 The extra amount at the extremes is the part the model still has to learn from temperature.
 
+# Figure 3: model predictions and actual results on the top 389 hours of the test data
+
+A perfect forecast sits on the diagonal (y=x), while a model stuck at its training range sits **flat**, 
+below the dotted training-max line.
+
+# Figure 4: monthly test bias by model
+
+
 
 # Note on modelling.py:
 13 Nov 2026 -> added a forecast export without changing any model or settings
