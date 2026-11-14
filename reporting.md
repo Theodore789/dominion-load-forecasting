@@ -631,7 +631,13 @@ below the dotted training-max line.
 
 # Figure 4: monthly test bias by model
 
+Arm C's tree and the MLP model, although belonging to different model families, 
+with the same representation they actually behave almost identically, so the representation (level_7d + d̂) 
+matters more than the model family.
 
+Arm C's tree and the MLP over-forecast some winters:
+about -700 MW in Jan 2025 and 
+about -1000 MW in early 2026
 
 # Note on modelling.py:
 13 Nov 2026 -> added a forecast export without changing any model or settings
