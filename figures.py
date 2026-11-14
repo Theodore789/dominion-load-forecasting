@@ -59,6 +59,7 @@ print(f"rise: {rate_early:,.0f} MW/yr (2019-22) vs {rate_late:,.0f} MW/yr (2022-
 (HERE / "figures").mkdir(exist_ok=True)
 fig.savefig(HERE / "figures" / "fig1_demand.pdf", bbox_inches="tight")
 fig.savefig(HERE / "figures" / "fig1_demand.png", dpi=300, bbox_inches="tight")
+
 print("saved fig1")
 
 
@@ -96,7 +97,7 @@ fig2.savefig(HERE / "figures" / "fig2_temperature.pdf", bbox_inches="tight")
 fig2.savefig(HERE / "figures" / "fig2_temperature.png", dpi=300, bbox_inches="tight")
 
 
-# Figure 3: model predictions and actual results on the top 389 hours of the test data
+# Figure 3: model forecasts on test vs true demand diagonal line
 
 f = pd.read_csv(HERE / "data" / "test_forecasts.csv", index_col=0, parse_dates=True)
 rec_f = f[f["record"]]
@@ -118,19 +119,43 @@ for ax, arm in zip(ax3, ["A", "B", "C"]):
 
 ax3[0].set_ylabel("Forecast (MW)")
 fig3.supxlabel("Actual demand (MW)")
-ax3[0].text(lo, train_max + 150, "training max", fontsize=7, color="grey")
+ax3[0].text(hi, train_max + 150, "training max", ha="right", fontsize=7, color="grey")
 fig3.suptitle("On record hours, arm A stays below the old maximum, while arm C follows the new records")
 
-fig3.savefig(HERE / "figures" / "fig3_preds_and_results.pdf", bbox_inches="tight")
-fig3.savefig(HERE / "figures" / "fig3_preds_and_results.png", dpi=300, bbox_inches="tight")
+assert len(rec_f) == 389
 
-if len(rec_f) == 389:
-      print("True")
-else:
-      print("False")
+fig3.savefig(HERE / "figures" / "fig3_rec_hours.pdf", bbox_inches="tight")
+fig3.savefig(HERE / "figures" / "fig3_rec_hours.png", dpi=300, bbox_inches="tight")
 
 
 # Figure 4: monthly test bias by model
 
- 
+fig4, ax4 = plt.subplots(figsize=(6.5, 2.4), layout="constrained")
 
+models = ["linear", "A", "C", "MLP"]
+errs = pd.DataFrame({m: f["y"] - f[m] for m in models})
+
+month = f.index.tz_convert("America/New_York").to_period("M")
+monthly = errs.groupby(month).mean()
+monthly.index = monthly.index.to_timestamp()
+
+colors = ["#e76f51", "grey", "#1f3b5c", "#2a9d8f"]
+offsets = {"linear": 0, "A": 0, "C": 150, "MLP": -150}
+
+for m, c in zip(models, colors):
+      a = 0.5 if m == "A" else 1.0
+      ax4.plot(monthly.index, monthly[m], color=c, linewidth=1.5, alpha=a)
+      ax4.text(monthly.index[-1], monthly[m].iloc[-1] + offsets[m], 
+               f" {m}",color=c, alpha=a, fontsize=8, va="center")
+
+ax4.axhline(0, color="black", linewidth=0.8)
+ax4.set_ylabel("Mean error (MW), + = under-forecast")
+ax4.yaxis.set_major_formatter(StrMethodFormatter("{x:,.0f}"))
+ax4.spines[["top", "right"]].set_visible(False)
+ax4.set_xlim(right=monthly.index[-1] + pd.Timedelta(days=60))
+ax4.set_title("Linear's bias grows to about 2,000 MW by 2026, while arm C and the MLP stay near zero")
+
+print(errs.mean().round(2))  # sanity check
+
+fig4.savefig(HERE / "figures" / "fig4_ME.pdf", bbox_inches="tight")
+fig4.savefig(HERE / "figures" / "fig4_ME.png", dpi=300, bbox_inches="tight")
