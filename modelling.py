@@ -374,6 +374,34 @@ if SPLIT == "test":
 
     out["record"] = rec
     out[m_eval].to_csv(HERE / "data" / "test_forecasts.csv")
-    
+
+    # refited linear model
+
+    # pred linear: MAE -> 50% less, ME -> 60% less, 
+    # because the demand has not grown as much yet
+    train_ref = local.year <= 2023
+    lin_ref = smf.ols(formula, data=df[train_ref & has_y])
+    results_ref = lin_ref.fit() 
+    lin_ref_pred = results_ref.predict(df)
+
+    # refitted arm C model
+
+    # pred arm C: MAE -> 80%, ME -> 90%, 
+    # the model will accurately capture the expected demand cause of relative features advantage
+    fit_rows_ref = train_ref & has_y & df["level_7d"].notna()
+    rel_ref = clone(hgb_model)
+    rel_ref.fit(df.loc[fit_rows_ref, X_rel], d[fit_rows_ref])
+    rel_ref_pred = rel_ref.predict(df[X_rel])
+    rel_ref_series = pd.Series(data=rel_ref_pred, index=df.index)
+
+    rel_ref_forecast = df["level_7d"] + rel_ref_series
+
+    rows_ref = {}
+    rows_ref["refitted_linear"] = score(lin_ref_pred[m_eval], y[m_eval])
+    rows_ref["refitted_arm_C"] = score(rel_ref_forecast[m_eval], y[m_eval])
+
+    print("SECONDARY: refit on Oct 2018--Dec 2023")
+    print(rows_ref)
+
     assert len(out[m_eval]) == 23899
     assert out.loc[m_eval, "record"].sum() == 389
