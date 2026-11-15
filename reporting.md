@@ -670,9 +670,9 @@ between the models comes from how growth is **represented**, not from how recent
 The frozen secondary run re-executed modelling.py in full, including the test evaluation;
 line 376 rewrote data/test_forecasts.csv (committed as fa68746)
 No code, settings or data changed. All test metrics match test_output.txt to 2 decimals.
-Maximum difference was approximately 7e-7, only affecting the linear model.
+The differences were: 6.99e-07 MW (linear); 0 for naive, A, B, C, MLP; record identical
 Results documented in check_output.txt.
-The cause was the floiting-point non-determinism in the OLS solve. 
+The cause was the floating-point non-determinism in the OLS solve. 
 
 
 # References
