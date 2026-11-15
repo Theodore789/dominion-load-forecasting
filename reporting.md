@@ -642,6 +642,31 @@ about -1000 MW in early 2026
 # Note on modelling.py:
 13 Nov 2026 -> added a forecast export without changing any model or settings
 
+# Secondary analysis (frozen, run once): include the validation year 2023 on the training set
+Refit linear and the arm C tree on Oct 2018 - Dec 2023 then evaluate on the same 23,899 hours.
+
+Two explanations for the linear model's collapse on test:
+
+- linear's straight trend fails because growth accelerated (refitting won't change the outcome), or
+- linear just missed 2023 in training (refitting)
+
+The trend coefficient is re-estimated with 2023 included, so the line starts higher, 
+but it's still a straight line, so it will fall behind again if growth accelerates.
+
+Predictions:
+linear model: MAE -> -50%, ME -> -60%
+arm C tree: MAE -> -80%, ME -> -90%
+
+Results: 
+linear model: MAE -> 904.2, ME -> +787.7 --> -10% MAE, still a large under-forecast
+arm C tree: MAE -> 593.4, ME -> -10.0 --> -1%, practically unchanged
+
+Giving the linear model one more year of data bearely helps. It still under-forecasts by about 790 MW, 
+because its straight trend can't follow accelerating growth. That's the same. acceleration Figure 1 measured:
+1.63 times faster. Arm C hardly needs the extra year, because L_t already carries the current level. So the gap
+between the models comes from how growth is **represented**, not from how recent the training data is. 
+
+
 # References
 
 [1] Géron, A. (2017) Hands-On Machine Learning with Scikit-Learn and TensorFlow 1st edn. Sebastopol, CA: O’Reilly, pp. 195–199.   
