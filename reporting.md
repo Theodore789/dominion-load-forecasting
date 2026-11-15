@@ -666,6 +666,12 @@ because its straight trend can't follow accelerating growth. That's the same. ac
 1.63 times faster. Arm C hardly needs the extra year, because L_t already carries the current level. So the gap
 between the models comes from how growth is **represented**, not from how recent the training data is. 
 
+# Dated note (15 Nov 2026)
+The frozen secondary run re-executed modelling.py in full, including the test evaluation.
+No code, settings or data changed. All test metrics match test_output.txt to 2 decimals.
+Maximum difference was approximately 1e-8, only affecting the linear model. Results documented in check_output.txt
+The cause was the floiting-point non-determinism in the OLS solve. 
+The rewritten file was committed as fa68746.
 
 # References
 
