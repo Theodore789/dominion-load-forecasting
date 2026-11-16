@@ -1,0 +1,13 @@
+floor: 10,453 MW (2019), 11,858 MW (2022), 14,142 (2025) MW
+rise: 468 MW/yr (2019-22) vs 761 MW/yr (2022-25), 1.63 x faster
+saved fig1
+temp_mean
+0.0     4209.0
+15.0    3487.0
+30.0    4452.0
+dtype: float64
+linear     912.96
+A         1649.56
+C           10.85
+MLP         -3.88
+dtype: float64
